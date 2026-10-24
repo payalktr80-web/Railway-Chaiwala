@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Chai Wala - रेलवे चाय वाला</title>
+    <style>
+        :root {
+            --railway-yellow: #f5b300;
+            --railway-dark: #121417;
+            --railway-panel: #1b1e24;
+            --railway-card: #242932;
+            --railway-border: #383f4d;
+            --railway-accent: #ff6f00;
+            --railway-green: #2e7d32;
+            --railway-red: #c62828;
+            --railway-text: #f0f3f6;
+            --railway-muted: #9aa5b5;
+            --chai-steam: rgba(255, 235, 205, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: var(--railway-dark);
+            color: var(--railway-text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Signboard */
+        header {
+            background: #0a0c0f;
+            border-bottom: 3px solid var(--railway-yellow);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .station-board {
+            background: var(--railway-yellow);
+            color: #111;
+            padding: 6px 18px;
+            border-radius: 4px;
+            border: 3px solid #111;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-weight: 900;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .station-board .hindi {
+            font-size: 1.15rem;
+            line-height: 1.2;
+        }
+
+        .station-board .english {
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+        }
+
+        .header-status {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: var(--railway-card);
+            border: 1px solid var(--railway-border);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge strong {
+            color: var(--railway-yellow);
+        }
+
+        .audio-btn {
+            background: #2a313d;
+            border: 1px solid var(--railway-border);
+            color: #fff;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .audio-btn:hover {
+            background: var(--railway-accent);
+        }
+
+        /* Main Game Layout */
+        main {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 15px;
+            padding: 15px;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 960px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Game Viewport / Canvas Area */
+        .viewport-panel {
+            background: var(--railway-panel);
+            border: 1px solid var(--railway-border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 380px;
+            background: #0d1117;
+            display: block;
+        }
+
+        .notification-bar {
+            background: #181c22;
+            padding: 10px 16px;
+            border-top: 1px solid var(--railway-border);
+            border-bottom: 1px solid var(--railway-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #e0e6ed;
+            min-height: 42px;
+        }
+
+        .notification-bar .hin {
+            color: var(--railway-yellow);
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+
+        /* Stations Grid */
+        .stations-grid {
+            padding: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            background: #14171d;
+            flex: 1;
+        }
+
+        .station-card {
+            background: var(--railway-card);
+            border: 1px solid var(--railway-border);
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .station-card h3 {
+            font-size: 0.95rem;
+            color: var(--railway-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--railway-border);
+            padding-bottom: 6px;
+        }
+
+        .station-card .status-indicator {
+            font-size: 0.8rem;
+            color: var(--railway-muted);
+            min-height: 24px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .btn {
+            background: #2b3340;
+            color: #fff;
+            border: 1px solid #444f63;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--railway-accent);
+            border-color: #ff9800;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--railway-accent);
+            border-color: #ff9800;
+            font-weight: 600;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: #ff8f00;
+        }
+
+        .btn-green {
+            background: var(--railway-green);
+            border-color: #4caf50;
+        }
+        .btn-green:hover:not(:disabled) {
+            background: #388e3c;
+        }
+
+        .btn-red {
+            background: var(--railway-red);
+            border-color: #e53935;
+        }
+
+        /* Meter bars */
+        .progress-bar-wrap {
+            width: 100%;
+            height: 8px;
+            background: #111418;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #2d3542;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff9800, #ff5722);
+            transition: width 0.1s linear;
+        }
+
+        /* Sidebar Panels */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sidebar-card {
+            background: var(--railway-panel);
+            border: 1px solid var(--railway-border);
+            border-radius: 8px;
+            padding: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .sidebar-card h2 {
+            font-size: 1.05rem;
+            color: var(--railway-yellow);
+            border-bottom: 1px solid var(--railway-border);
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Customer Order Card */
+        .customer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #323b49;
+            border: 2px solid var(--railway-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-right: 10px;
+        }
+
+        .customer-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .order-bubble {
+            background: #15181e;
+            border-left: 3px solid var(--railway-yellow);
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .patience-wrap {
+            margin-top: 8px;
+        }
+
+        .patience-bar {
+            height: 6px;
+            background: #2e7d32;
+            width: 100%;
+            border-radius: 3px;
+            transition: width 0.2s, background-color 0.3s;
+        }
+
+        /* Objectives Card */
+        .objective-item {
+            background: #161a22;
+            border-left: 3px solid #00bcd4;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .objective-item strong {
+            color: #80deea;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* Dialogue Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .dialogue-box {
+            background: #151922;
+            border: 2px solid var(--railway-yellow);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 850px;
+            padding: 18px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            animation: slideUp 0.2s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .dialogue-speaker {
+            color: var(--railway-yellow);
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dialogue-text-eng {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: #fff;
+        }
+
+        .dialogue-text-hin {
+            font-size: 0.95rem;
+            color: #ffcc80;
+            line-height: 1.4;
+            border-top: 1px dashed #343d4d;
+            padding-top: 8px;
+        }
+
+        .dialogue-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .choice-btn {
+            background: #242c3a;
+            border: 1px solid #ff9800;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 0.95rem;
+        }
+
+        .choice-btn:hover {
+            background: #e65100;
+            border-color: #ffa726;
+        }
+
+        /* Receipt Modal */
+        .receipt-card {
+            background: #fff8e7;
+            color: #111;
+            font-family: "Courier New", Courier, monospace;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+            max-width: 400px;
+            width: 100%;
+            white-space: pre-wrap;
+            line-height: 1.4;
+            font-size: 0.9rem;
+        }
+
+        /* Climax Horror Effect */
+        .horror-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 40%, rgba(139, 0, 0, 0.4) 100%);
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .horror-overlay.active {
+            opacity: 1;
+        }
+
+        /* Flicker Animation */
+        @keyframes tubeFlicker {
+            0% { opacity: 0.97; }
+            40% { opacity: 0.97; }
+            42% { opacity: 0.3; }
+            44% { opacity: 0.97; }
+            46% { opacity: 0.1; }
+            48% { opacity: 0.95; }
+            100% { opacity: 0.97; }
+        }
+
+        .flicker {
+            animation: tubeFlicker 4s infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="station-board">
+            <span class="hindi">फ़कीरपुर जंक्शन</span>
+            <span class="english">FAKRIPUR JN.</span>
+        </div>
+
+        <div class="header-status">
+            <div class="badge">
+                <span>Shift / पहर:</span>
+                <strong id="shiftBadge">1 (Dawn)</strong>
+            </div>
+            <div class="badge">
+                <span>Rupees / रुपये:</span>
+                <strong id="rupeesBadge">₹ 50</strong>
+            </div>
+            <div class="badge">
+                <span>Rating:</span>
+                <strong id="ratingBadge">★★★★★ 5.0</strong>
+            </div>
+            <div class="badge">
+                <span>Station Time:</span>
+                <strong id="clockBadge">05:30 AM</strong>
+            </div>
+            <button class="audio-btn" id="btnAudioToggle" title="Toggle Sound">🔊 Sound: ON</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Viewport & Stations Column -->
+        <div class="viewport-panel">
+            <div class="horror-overlay" id="horrorOverlay"></div>
+            <!-- Canvas Simulation -->
+            <canvas id="gameCanvas" width="900" height="380"></canvas>
+
+            <!-- Live Status & Notifications -->
+            <div class="notification-bar">
+                <div>
+                    <span id="notifEng">Welcome to Fakripur Railway Station!</span>
+                    <span id="notifHin" class="hin">ताज़ा चाय बनाना शुरू करें।</span>
+                </div>
+                <div style="font-size:0.8rem; color:#888;">
+                    <span>Shortcuts: [B] Burner | [P] Pour | [C] Coffee | [N] Fuggi | [S] Serve</span>
+                </div>
+            </div>
+
+            <!-- Interactive Counter Stations -->
+            <div class="stations-grid">
+
+                <!-- 1. Cooking Pot (Chai Stove) -->
+                <div class="station-card">
+                    <h3>
+                        <span>🍵 Chai Stove / चूल्हा</span>
+                        <span id="potTemp">25°C</span>
+                    </h3>
+                    <div class="status-indicator" id="potStatus">Empty Pot / खाली पतीला</div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar" id="potProgress"></div>
+                    </div>
+                    
+                    <div class="btn-group" style="margin-top: 4px;">
+                        <button class="btn" onclick="game.addIngredient(1)">+ Water (पानी)</button>
+                        <button class="btn" onclick="game.addIngredient(2)">+ Milk (दूध)</button>
+                        <button class="btn" onclick="game.addIngredient(3)">+ Patti (पत्ती)</button>
+                        <button class="btn" onclick="game.addIngredient(4)">+ Sugar (चीनी)</button>
+                        <button class="btn" onclick="game.addIngredient(5)">+ Adrak (अदरक)</button>
+                        <button class="btn" onclick="game.addIngredient(6)">+ Elaichi (इलायची)</button>
+                    </div>
+
+                    <div class="btn-group" style="margin-top: 8px;">
+                        <button class="btn btn-primary" id="btnBurner" onclick="game.toggleBurner()">🔥 Light Burner</button>
+                        <button class="btn btn-green" id="btnPourChai" onclick="game.pourChai(11)">🏺 Pour Kulhad</button>
+                        <button class="btn btn-red" onclick="game.resetPot()">🗑️ Discard</button>
+                    </div>
+                </div>
+
+                <!-- 2. Coffee Machine -->
+                <div class="station-card">
+                    <h3>
+                        <span>☕ Coffee Machine / कॉफ़ी</span>
+                        <span id="coffeePercent">0%</span>
+                    </h3>
+                    <div class="status-indicator" id="coffeeStatus">Insert Cup / कप लगाएं</div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar" id="coffeeProgress"></div>
+                    </div>
+
+                    <div class="btn-group" style="margin-top: 10px;">
+                        <button class="btn" id="btnInsertCoffeeCup" onclick="game.insertCoffeeCup()">🥤 Insert Cup</button>
+                        <button class="btn btn-primary" id="btnBrewCoffee" onclick="game.brewCoffee()">⚙️ Brew Coffee</button>
+                        <button class="btn btn-green" id="btnPickupCoffee" onclick="game.pickupCoffee()">☕ Take Coffee</button>
+                    </div>
+                </div>
+
+                <!-- 3. Fuggi Noodles Prep -->
+                <div class="station-card">
+                    <h3>
+                        <span>🍜 Fuggi Station / फुग्गी</span>
+                        <span>2-Min</span>
+                    </h3>
+                    <div class="status-indicator" id="fuggiStatus">Place Packet / पैकेट रखें</div>
+                    
+                    <div class="btn-group" style="margin-top: 10px;">
+                        <button class="btn" onclick="game.placeFuggi()">📦 Place Packet</button>
+                        <button class="btn" onclick="game.cutFuggi()">🔪 Cut Packet</button>
+                        <button class="btn" onclick="game.addFuggiBrickToPot()">+ Noodle into Pot</button>
+                        <button class="btn" onclick="game.addTasteMakerToPot()">+ Masala into Pot</button>
+                        <button class="btn btn-green" onclick="game.pourChai(13)">🍽️ Plate Fuggi</button>
+                    </div>
+                </div>
+
+                <!-- 4. Snack Warming & Tray Packing -->
+                <div class="station-card">
+                    <h3>
+                        <span>🍱 Serving Tray / ट्रे</span>
+                        <span id="trayItemCount">0/4 Items</span>
+                    </h3>
+                    <div class="status-indicator" id="traySummary">Empty Tray / खाली ट्रे</div>
+
+                    <div class="btn-group" style="margin-top: 4px;">
+                        <button class="btn" onclick="game.packItem(30)">🥟 + Samosa (₹15)</button>
+                        <button class="btn" onclick="game.packItem(31)">🍔 + Vadapav (₹20)</button>
+                        <button class="btn" onclick="game.packItem(32)">🍾 + Kokila Kola (₹25)</button>
+                        <button class="btn btn-primary" onclick="game.packHeldItem()">➕ Pack Held Item</button>
+                    </div>
+
+                    <div class="btn-group" style="margin-top: 8px;">
+                        <button class="btn btn-green" onclick="game.serveTray()">🛎️ Serve Customer</button>
+                        <button class="btn" onclick="game.printBillModal()">🧾 Print Bill</button>
+                        <button class="btn btn-red" onclick="game.clearTray()">🧹 Clear Tray</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Sidebar Column -->
+        <div class="sidebar">
+
+            <!-- Active Customer Card -->
+            <div class="sidebar-card">
+                <h2>
+                    <span>Current Customer</span>
+                    <span style="font-size:0.8rem; font-weight:normal;" id="custStateLabel">Arriving...</span>
+                </h2>
+                
+                <div class="customer-info">
+                    <div class="customer-avatar" id="custAvatar">👤</div>
+                    <div>
+                        <strong id="custName" style="color:var(--railway-yellow); font-size:1rem;">Preet (प्रीत)</strong>
+                        <div style="font-size:0.8rem; color:#aaa;" id="custMood">Patient / सामान्य</div>
+                    </div>
+                </div>
+
+                <div class="order-bubble">
+                    <div style="font-size:0.75rem; color:#aaa; margin-bottom:2px;">WANTS / चाहिए:</div>
+                    <strong id="custOrderText" style="color:#fff;">1x Kadak Chai (कड़क चाय)</strong>
+                </div>
+
+                <div class="patience-wrap">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:3px;">
+                        <span>Patience / धैर्य</span>
+                        <span id="patiencePercentText">100%</span>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="patience-bar" id="patienceBar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Objectives & Investigation Card -->
+            <div class="sidebar-card">
+                <h2>
+                    <span>Current Shift Task</span>
+                    <button class="btn" style="padding:2px 8px; font-size:0.75rem;" onclick="game.advanceShift()">Next Shift ⏩</button>
+                </h2>
+                <div class="objective-item">
+                    <strong id="objTitle">Morning Rush: Brew Kadak Chai</strong>
+                    <div id="objDesc" style="color:#cfd8dc; font-size:0.8rem; margin-top:3px;">Add ingredients to pot, boil and pour into clay Kulhad.</div>
+                </div>
+
+                <div style="margin-top:12px; border-top:1px solid var(--railway-border); padding-top:10px;">
+                    <button class="btn" style="width:100%; justify-content:center; margin-bottom:6px;" onclick="game.inspectPlatform2()">🔍 Inspect Platform 2 / पटरी देखें</button>
+                    <button class="btn" style="width:100%; justify-content:center;" onclick="game.readNewspaper()">📰 Read Station Newspaper / अखबार पढ़ें</button>
+                </div>
+            </div>
+
+            <!-- Station Notes & Clues -->
+            <div class="sidebar-card" style="font-size:0.8rem; line-height:1.4; color:#a0aab8;">
+                <h2 style="font-size:0.95rem;">Fakripur Daily Gazette</h2>
+                <p>⚠️ <em>"Mysterious Disappearances Reported on Midnight Express... Passengers warned not to wander past platform stairs after 11 PM."</em></p>
+                <p style="margin-top:8px;">💡 Tip: Keep water boiling before trains pull in. Passengers leave fast!</p>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Dialogue Modal -->
+    <div class="modal-overlay" id="dialogueModal">
+        <div class="dialogue-box">
+            <div class="dialogue-speaker">
+                <span id="dialogueSpeaker">Ramu (रामू)</span>
+                <button class="btn" style="font-size:0.75rem; padding:3px 8px;" onclick="game.skipDialogue()">Skip [Esc]</button>
+            </div>
+            <div class="dialogue-text-eng" id="dialogueEng">Dialogue line goes here...</div>
+            <div class="dialogue-text-hin" id="dialogueHin">यहाँ हिंदी अनुवाद आएगा...</div>
+            
+            <div class="dialogue-choices" id="dialogueChoices" style="display:none;"></div>
+            
+            <div style="display:flex; justify-content:flex-end; margin-top:8px;" id="dialogueNextWrap">
+                <button class="btn btn-primary" onclick="game.nextDialogue()">Continue [Space] ➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill Receipt Modal -->
+    <div class="modal-overlay" id="billModal" onclick="this.classList.remove('active')">
+        <div class="receipt-card" onclick="event.stopPropagation()">
+            <div id="receiptContent">Printing bill...</div>
+            <button class="btn btn-primary" style="margin-top:15px; width:100%; justify-content:center;" onclick="document.getElementById('billModal').classList.remove('active')">Close Receipt [X]</button>
+        </div>
+    </div>
+
+    <script>
+    // Embedded WebAssembly Bytecode (compiled from reversed C++ source)
+    const WASM_BASE64 = "AGFzbQEAAAABTA5gAX8Bf2AAAX9gAX8AYAJ/fwF/YAJ/fwBgAABgAn99AGADf39/AX9gA39/fwBgAAF9YAN/f30AYAV/f39/fQBgAX0AYAR/f39/AX8DlwGVAQUAAgMDAwgAAAIDAAYAAAAAAgMKBgAAAwAAAAsGBwAAAAACAgMABAADAAYEAAIDAAAAAAAAAgIEBAAAAAIDAwMAAggAAwIDAwMDAAIEBgICBQwBAQEFAAEJCQEBAAAAAQkBAQEBAQEBAQEBAAUBAAEBAQkBAAEBAQUCBQEBAQIEBAQICAQEBAQEBAQAAgcHBwcADQAEBQMBACIGLwd/AUHwgIUBC38AQYAIC38AQfCAgQELfwBBgAgLfwBB8ICFAQt/AEEAC38AQQELB4spsAEGbWVtb3J5AgARX193YXNtX2NhbGxfY3RvcnMAABtfWk4xOEJpbGxSZWNlaXB0Q291bnRlckMyRXYAAR9fWk4xOEJpbGxSZWNlaXB0Q291bnRlcjVyZXNldEV2AAIrX1pOSzE4QmlsbFJlY2VpcHRDb3VudGVyOGdldFByaWNlRThJdGVtVHlwZQADLl9aTksxOEJpbGxSZWNlaXB0Q291bnRlcjEwZ2V0TmFtZUVuZ0U4SXRlbVR5cGUABC5fWk5LMThCaWxsUmVjZWlwdENvdW50ZXIxMGdldE5hbWVIaW5FOEl0ZW1UeXBlAAUtX1pOMThCaWxsUmVjZWlwdENvdW50ZXI4c2V0T3JkZXJFUEs4SXRlbVR5cGVpAAYjX1pOMThCaWxsUmVjZWlwdENvdW50ZXI5cHJpbnRCaWxsRXYABxtfWk4xOEJpbGxSZWNlaXB0Q291bnRlckMxRXYAARZfWk4xM0NvZmZlZU1hY2hpbmVDMkV2AAgaX1pOMTNDb2ZmZWVNYWNoaW5lNXJlc2V0RXYACSZfWk4xM0NvZmZlZU1hY2hpbmU5aW5zZXJ0Q3VwRThJdGVtVHlwZQAKIl9aTjEzQ29mZmVlTWFjaGluZTEyc3RhcnRCcmV3aW5nRXYACxtfWk4xM0NvZmZlZU1hY2hpbmU2dXBkYXRlRWYADCJfWk4xM0NvZmZlZU1hY2hpbmUxMnBpY2t1cENvZmZlZUV2AA0pX1pOSzEzQ29mZmVlTWFjaGluZTE4Z2V0U3RhdHVzVGV4dEhpbmRpRXYADitfWk5LMTNDb2ZmZWVNYWNoaW5lMjBnZXRTdGF0dXNUZXh0RW5nbGlzaEV2AA8WX1pOMTNDb2ZmZWVNYWNoaW5lQzFFdgAIE19aTjEwQ29va2luZ1BvdEMyRXYAEBdfWk4xMENvb2tpbmdQb3Q1cmVzZXRFdgARKF9aTjEwQ29va2luZ1BvdDEzYWRkSW5ncmVkaWVudEU4SXRlbVR5cGUAEhxfWk4xMENvb2tpbmdQb3Q5c2V0QnVybmVyRWJmABMYX1pOMTBDb29raW5nUG90NnVwZGF0ZUVmABQnX1pOSzEwQ29va2luZ1BvdDE5Z2V0VG90YWxJbmdyZWRpZW50c0V2ABUkX1pOSzEwQ29va2luZ1BvdDE2Z2V0Q29va2VkUHJvZHVjdEV2ABYsX1pOMTBDb29raW5nUG90MTdwb3VySW50b0NvbnRhaW5lckU4SXRlbVR5cGUAFyZfWk5LMTBDb29raW5nUG90MThnZXRTdGF0dXNUZXh0SGluZGlFdgAYKF9aTksxMENvb2tpbmdQb3QyMGdldFN0YXR1c1RleHRFbmdsaXNoRXYAGRNfWk4xMENvb2tpbmdQb3RDMUV2ABAdX1pOMjBDdXN0b21lclN0YXRlTWFjaGluZUMyRXYAGkJfWk4yMEN1c3RvbWVyU3RhdGVNYWNoaW5lMTNzcGF3bkN1c3RvbWVyRTEwQ3VzdG9tZXJJRFBLOEl0ZW1UeXBlaWYAGyJfWk4yMEN1c3RvbWVyU3RhdGVNYWNoaW5lNnVwZGF0ZUVmABw7X1pOMjBDdXN0b21lclN0YXRlTWFjaGluZTE5Y2hlY2tEZWxpdmVyZWRJdGVtc0VQSzhJdGVtVHlwZWkAHStfWk4yMEN1c3RvbWVyU3RhdGVNYWNoaW5lMTRjb2xsZWN0UGF5bWVudEV2AB4wX1pOSzIwQ3VzdG9tZXJTdGF0ZU1hY2hpbmUxOGdldEN1c3RvbWVyTmFtZUVuZ0V2AB8wX1pOSzIwQ3VzdG9tZXJTdGF0ZU1hY2hpbmUxOGdldEN1c3RvbWVyTmFtZUhpbkV2ACAdX1pOMjBDdXN0b21lclN0YXRlTWFjaGluZUMxRXYAGhhfWk4xNURpYWxvZ3VlTWFuYWdlckMyRXYAIS1fWk4xNURpYWxvZ3VlTWFuYWdlcjIxaW5pdEFsbFN0b3J5RGlhbG9ndWVzRXYAIgZtZW1jcHkAjQEcX1pOMTVEaWFsb2d1ZU1hbmFnZXI1cmVzZXRFdgAjIF9aTksxNURpYWxvZ3VlTWFuYWdlcjhmaW5kTm9kZUVpACQnX1pOSzE1RGlhbG9ndWVNYW5hZ2VyMTRnZXRDdXJyZW50Tm9kZUV2ACUlX1pOMTVEaWFsb2d1ZU1hbmFnZXIxM3N0YXJ0RGlhbG9ndWVFaQAmJF9aTjE1RGlhbG9ndWVNYW5hZ2VyMTJuZXh0U2VudGVuY2VFdgAnJF9aTjE1RGlhbG9ndWVNYW5hZ2VyMTJzZWxlY3RDaG9pY2VFaQAoG19aTjE1RGlhbG9ndWVNYW5hZ2VyNHNraXBFdgApHV9aTjE1RGlhbG9ndWVNYW5hZ2VyNnVwZGF0ZUVmACotX1pOMTVEaWFsb2d1ZU1hbmFnZXI3YWRkTm9kZUVSSzEyRGlhbG9ndWVOb2RlACsYX1pOMTVEaWFsb2d1ZU1hbmFnZXJDMUV2ACEaX1pOMTdGdWdnaUN1dHRpbmdQbGFjZUMyRXYALB5fWk4xN0Z1Z2dpQ3V0dGluZ1BsYWNlNXJlc2V0RXYALS1fWk4xN0Z1Z2dpQ3V0dGluZ1BsYWNlMTFwbGFjZVBhY2tldEU4SXRlbVR5cGUALiJfWk4xN0Z1Z2dpQ3V0dGluZ1BsYWNlOWN1dFBhY2tldEV2AC8iX1pOMTdGdWdnaUN1dHRpbmdQbGFjZTl0YWtlQnJpY2tFdgAwKF9aTjE3RnVnZ2lDdXR0aW5nUGxhY2UxNHRha2VUYXN0ZU1ha2VyRXYAMS1fWk5LMTdGdWdnaUN1dHRpbmdQbGFjZTE4Z2V0U3RhdHVzVGV4dEhpbmRpRXYAMi9fWk5LMTdGdWdnaUN1dHRpbmdQbGFjZTIwZ2V0U3RhdHVzVGV4dEVuZ2xpc2hFdgAzGl9aTjE3RnVnZ2lDdXR0aW5nUGxhY2VDMUV2ACwZX1pOMTZPYmplY3RpdmVNYW5hZ2VyQzJFdgA0J19aTjE2T2JqZWN0aXZlTWFuYWdlcjE0aW5pdE9iamVjdGl2ZXNFdgA1HV9aTjE2T2JqZWN0aXZlTWFuYWdlcjVyZXNldEV2ADYlX1pOMTZPYmplY3RpdmVNYW5hZ2VyMTJzZXRPYmplY3RpdmVFaQA3Kl9aTjE2T2JqZWN0aXZlTWFuYWdlcjE3cHJvZ3Jlc3NPYmplY3RpdmVFaQA4LF9aTksxNk9iamVjdGl2ZU1hbmFnZXIxOGlzQ3VycmVudENvbXBsZXRlZEV2ADktX1pOSzE2T2JqZWN0aXZlTWFuYWdlcjE5Z2V0Q3VycmVudE9iamVjdGl2ZUV2ADoZX1pOMTZPYmplY3RpdmVNYW5hZ2VyQzFFdgA0F19aTjE0UGFja2luZ1N0YXRpb25DMkV2ADsbX1pOMTRQYWNraW5nU3RhdGlvbjVyZXNldEV2ADwlX1pOMTRQYWNraW5nU3RhdGlvbjdhZGRJdGVtRThJdGVtVHlwZQA9KV9aTjE0UGFja2luZ1N0YXRpb24xMHJlbW92ZUl0ZW1FOEl0ZW1UeXBlAD4bX1pOMTRQYWNraW5nU3RhdGlvbjVjbGVhckV2ADwmX1pOSzE0UGFja2luZ1N0YXRpb243aGFzSXRlbUU4SXRlbVR5cGUAPxdfWk4xNFBhY2tpbmdTdGF0aW9uQzFFdgA7HF9aTjE5UmFpbHdheUNoYWlXYWxhR2FtZUMyRXYAQB9fWk4xOVJhaWx3YXlDaGFpV2FsYUdhbWU0aW5pdEV2AEEwX1pOMTlSYWlsd2F5Q2hhaVdhbGFHYW1lMTVzZXROb3RpZmljYXRpb25FUEtjUzFfAEItX1pOMTlSYWlsd2F5Q2hhaVdhbGFHYW1lMTdwb3BMYXN0QXVkaW9FdmVudEV2AEMuX1pOMTlSYWlsd2F5Q2hhaVdhbGFHYW1lMTBwaWNrdXBJdGVtRThJdGVtVHlwZQBEI19aTjE5UmFpbHdheUNoYWlXYWxhR2FtZThkcm9wSXRlbUV2AEUqX1pOMTlSYWlsd2F5Q2hhaVdhbGFHYW1lMTRpbnRlcmFjdEJ1cm5lckViAEY2X1pOMTlSYWlsd2F5Q2hhaVdhbGFHYW1lMThhZGRJbmdyZWRpZW50VG9Qb3RFOEl0ZW1UeXBlAEcvX1pOMTlSYWlsd2F5Q2hhaVdhbGFHYW1lMTFwb3VyUG90Q2hhaUU4SXRlbVR5cGUASDRfWk4xOVJhaWx3YXlDaGFpV2FsYUdhbWUxNnBhY2tJdGVtT250b1RyYXlFOEl0ZW1UeXBlAEkpX1pOMTlSYWlsd2F5Q2hhaVdhbGFHYW1lMTNzZXJ2ZUN1c3RvbWVyRXYASiRfWk4xOVJhaWx3YXlDaGFpV2FsYUdhbWU5bmV4dFNoaWZ0RXYASy9fWk4xOVJhaWx3YXlDaGFpV2FsYUdhbWUxOXRyaWdnZXJIb3Jyb3JDbGltYXhFaQBMIV9aTjE5UmFpbHdheUNoYWlXYWxhR2FtZTZ1cGRhdGVFZgBNLl9aTjE5UmFpbHdheUNoYWlXYWxhR2FtZTE4c3Bhd25TaGlmdEN1c3RvbWVyRXYATitfWk4xOVJhaWx3YXlDaGFpV2FsYUdhbWUxNWNoZWNrT2JqZWN0aXZlc0V2AE8cX1pOMTlSYWlsd2F5Q2hhaVdhbGFHYW1lQzFFdgBACHJjd19pbml0AFAGX1pkbFB2AIwBBV9abndtAIsBCnJjd191cGRhdGUAUQ1yY3dfZ2V0X3NoaWZ0AFIOcmN3X2dldF9ydXBlZXMAUxJyY3dfZ2V0X2dhbWVfc3RhdGUAVA5yY3dfbmV4dF9zaGlmdABVEXJjd190b2dnbGVfYnVybmVyAFYQcmN3X2lzX2J1cm5lcl9vbgBXEHJjd19nZXRfcG90X3RlbXAAWBRyY3dfZ2V0X3BvdF9wcm9ncmVzcwBZEXJjd19pc19wb3RfY29va2VkAFoRcmN3X2lzX3BvdF9idXJuZWQAWxlyY3dfYWRkX2luZ3JlZGllbnRfdG9fcG90AFwNcmN3X3BvdXJfY2hhaQBdFXJjd19jb2ZmZWVfaW5zZXJ0X2N1cABeD3Jjd19jb2ZmZWVfYnJldwBfF3Jjd19nZXRfY29mZmVlX3Byb2dyZXNzAGATcmN3X2lzX2NvZmZlZV9yZWFkeQBhEXJjd19jb2ZmZWVfcGlja3VwAGIPcmN3X2Z1Z2dpX3BsYWNlAGMNcmN3X2Z1Z2dpX2N1dABkFHJjd19mdWdnaV90YWtlX2JyaWNrAGUZcmN3X2Z1Z2dpX3Rha2VfdGFzdGVtYWtlcgBmE3Jjd19pc19mdWdnaV9wbGFjZWQAZxByY3dfaXNfZnVnZ2lfY3V0AGgTcmN3X2hhc19mdWdnaV9icmljawBpE3Jjd19oYXNfdGFzdGVfbWFrZXIAag1yY3dfcGFja19pdGVtAGsOcmN3X2NsZWFyX3RyYXkAbBdyY3dfZ2V0X3RyYXlfaXRlbV9jb3VudABtEXJjd19nZXRfdHJheV9pdGVtAG4ScmN3X3NlcnZlX2N1c3RvbWVyAG8TcmN3X2dldF9jdXN0b21lcl9pZABwFnJjd19nZXRfY3VzdG9tZXJfc3RhdGUAcRlyY3dfZ2V0X2N1c3RvbWVyX3BhdGllbmNlAHIecmN3X2dldF9jdXN0b21lcl9kZXNpcmVkX2NvdW50AHMdcmN3X2dldF9jdXN0b21lcl9kZXNpcmVkX2l0ZW0AdA5yY3dfcHJpbnRfYmlsbAB1FnJjd19pc19kaWFsb2d1ZV9hY3RpdmUAdhhyY3dfZ2V0X2RpYWxvZ3VlX25vZGVfaWQAdxFyY3dfZGlhbG9ndWVfbmV4dAB4E3Jjd19kaWFsb2d1ZV9jaG9pY2UAeRFyY3dfZGlhbG9ndWVfc2tpcAB6HXJjd19nZXRfZGlhbG9ndWVfY2hvaWNlX2NvdW50AHsUcmN3X2dldF9vYmplY3RpdmVfaWQAfBpyY3dfaXNfb2JqZWN0aXZlX2NvbXBsZXRlZAB9EnJjd190cmlnZ2VyX2NsaW1heAB+FHJjd19nZXRfc3BlYWtlcl9uYW1lAH8ZcmN3X2dldF9kaWFsb2d1ZV90ZXh0X2VuZwCAARlyY3dfZ2V0X2RpYWxvZ3VlX3RleHRfaGluAIEBF3Jjd19nZXRfY2hvaWNlX3RleHRfZW5nAIIBF3Jjd19nZXRfY2hvaWNlX3RleHRfaGluAIMBGHJjd19nZXRfbm90aWZpY2F0aW9uX2VuZwCEARhyY3dfZ2V0X25vdGlmaWNhdGlvbl9oaW4AhQEbcmN3X2dldF9vYmplY3RpdmVfdGl0bGVfZW5nAIYBG3Jjd19nZXRfb2JqZWN0aXZlX3RpdGxlX2hpbgCHARpyY3dfZ2V0X29iamVjdGl2ZV9kZXNjX2VuZwCIARpyY3dfZ2V0X29iamVjdGl2ZV9kZXNjX2hpbgCJARNyY3dfcG9wX2F1ZGlvX2V2ZW50AIoBBm1hbGxvYwCLAQRmcmVlAIwBBm1lbXNldACOAQdtZW1tb3ZlAI8BBm1lbWNtcACQAQZzdHJsZW4AkQEJdnNucHJpbnRmAJIBHV9aU3QyMF9fdGhyb3dfbGVuZ3RoX2Vycm9yUEtjAIwBHF9aU3QxOV9fdGhyb3dfbG9naWNfZXJyb3JQS2MAjAEYX1pTdDE3X190aHJvd19iYWRfYWxsb2N2AAAPX1pTdDl0ZXJtaW5hdGV2AAARX19jeGFfYmVnaW5fY2F0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gICAoA03AgAgAUIANwIUIAFB7ccANgIQIAFBi8YANgIMIAFBhD42AgggAUHvPTYCBCABQekANgIAIAFB8cgANgJMIAJBJ0wEQCAAIAJBAWo2AoAZIAAgAkHQAGxqIAFB0AAQjQEaIAAoAoAZIQILIAFBHGpCADcCACABQSRqIgNCADcCACABQSxqIgRCADcCACABQTRqQgA3AgAgAUE8aiIFQgA3AgAgAUHEAGoiBkKAgICAsA03AgAgAUIANwIUIAFBwcoANgIQIAFBgckANgIMIAFBnRU2AgggAUGYFTYCBCABQeoANgIAIAFBqys2AkwgAkEnTARAIAAgAkEBajYCgBkgACACQdAAbGogAUHQABCNARogACgCgBkhAgsgAUEgakHo0AAoAgA2AgAgA0Hs0AApAgA3AgAgBEH00AAoAgA2AgAgAUEwakH40AApAwA3AwAgAUE4akGA0QAoAgA2AgAgAUEDNgIUIAFB4dEANgIQIAFBhNEANgIMIAFBhD42AgggAUHvPTYCBCABQesANgIAIAFB4NAAKQMANwMYIAZCADcCACAFQgA3AgAgAUG70wA2AkwgAkEnTARAIAAgAkEBajYCgBkgACACQdAAbGogAUHQABCNARogACgCgBkhAgsgAUEcaiIDQgA3AgAgAUEkaiIEQgA3AgAgAUEsaiIFQgA3AgAgAUE0aiIGQgA3AgAgAUE8aiIHQgA3AgAgAUHEAGoiCEKAgICAcDcCACABQgA3AhQgAUG71AA2AhAgAUHI0wA2AgwgAUGdFTYCCCABQZgVNgIEIAFB7gA2AgAgAUH91QA2AkwgAkEnTARAIAAgAkEBajYCgBkgACACQdAAbGogAUHQABCNARogACgCgBkhAgsgA0IANwIAIARCADcCACAFQgA3AgAgBkIANwIAIAdCADcCACAIQoCAgIBwNwIAIAFCADcCFCABQYnXADYCECABQYvWADYCDCABQYQ+NgIIIAFB7z02AgQgAUHvADYCACABQZ/ZADYCTCACQSdMBEAgACACQQFqNgKAGSAAIAJB0ABsaiABQdAAEI0BGiAAKAKAGSECCyABQRxqQgA3AgAgAUEkakIANwIAIAFBLGpCADcCACABQTRqQgA3AgAgAUE8akIANwIAIAFBxABqQoCAgIBwNwIAIAFCADcCFCABQaraADYCECABQbDZADYCDCABQckxNgIIIAFBuDE2AgQgAUHwADYCACABQYPcADYCTCACQSdMBEAgACACQQFqNgKAGSAAIAJB0ABsaiABQdAAEI0BGgsgAUHQAGokAAseACAAQoCAgPwDNwKMGSAAQQA6AIgZIABBfzYChBkLPgECfyAAKAKAGSIDQQBMBEBBAA8LAkADQCAAKAIAIAFGDQEgAEHQAGohACACQQFqIgIgA0gNAAtBAA8LIAALWQECfyAALQCIGUUEQEEADwsgACgChBkiAkEASARAQQAPCyAAKAKAGSIBQQBMBEBBAA8LAkADQCAAKAIAIAJGDQEgAEHQAGohACABQQFrIgENAAtBAA8LIAALUQECfwJAIAAoAoAZIgNBAEwNACAAIQIDQCABIAIoAgBHBEAgAkHQAGohAiADQQFrIgMNAQwCCwsgAEIANwKMGSAAQQE6AIgZIAAgATYChBkLC7cBAQR/IAAtAIgZRQRAQQAPCwJAAkAgACgChBkiBEEASA0AIAAoAoAZIgNBAEwNACAAIQEDQCAEIAEoAgBHBEAgAUHQAGohASADQQFrIgMNAQwCCwsgACoCjBlDAACAP10EQCAAQYCAgPwDNgKMGUEBDwsgAUEUaigCAEEASg0BIAFByABqKAIAIgFBAEoEQCAAQgA3AowZIAAgATYChBlBAQ8LIABBfzYChBkLIAAgAjoAiBkLIAILzQEBBX8gAC0AiBlFBEBBAA8LAkAgACgChBkiBkEASA0AIAAoAoAZIgRBAEwNACAEIQUgACECA0AgBiACKAIARwRAIAJB0ABqIQIgBUEBayIFDQEMAgsLIAFBAEgNACACQRRqKAIAIAFMDQACQCABQQxsIAJqQSBqKAIAIgFBAEwNACAAIQIDQCABIAIoAgBHBEAgAkHQAGohAiAEQQFrIgQNAQwCCwsgAEIANwKMGSAAIAE2AoQZQQEPCyAAQX82AoQZIABBADoAiBkLIAMLHQAgAC0AiBlFBEBBAA8LIABBgICA/AM2AowZQQELWwACQCAALQCIGUUNACAAKgKMGUMAAIA/XUUNACAAIAAqApAZIAGSIgE4ApAZIAAgAUMAAPBBlEMAAMhClSIBOAKMGSABQwAAgD9gRQ0AIABBgICA/AM2AowZCwsvAQF/IAAoAoAZIgJBJ0wEQCAAIAJBAWo2AoAZIAAgAkHQAGxqIAFB0AAQjQEaCwsLACAAQQA2AAAgAAsJACAAQQA2AAALLwEBfwJAIAAtAAANACAALQACIAFBB0dyDQAgAC0AAw0AQQEhAiAAQQE7AAALIAILJgEBfwJAIAAtAABFDQAgAC0AAQ0AIABBgIKECDYAAEEBIQELIAELFwAgAC0AAkUEQEEADwsgAEEAOgACQQgLFwAgAC0AA0UEQEEADwsgAEEAOgADQQkLLQEBf0GQ3AAhAQJAIAAtAAINACAALQADDQBB2twAQZvdACAALQAAGyEBCyABCy0BAX9B4N0AIQECQCAALQACDQAgAC0AAw0AQf/dAEGi3gAgAC0AABshAQsgAQvaAwAgAEEFNgKAASAAQQQ2AmAgAEEDNgJAIABBAjYCICAAQgE3AhggAEEAOgAUIABB798ANgIQIABBp98ANgIMIABB2N4ANgIIIABBut4ANgIEIABBATYCACAAQoaAgIAQNwKAAiAAQZgBakIBNwIAIABBlAFqQQA6AAAgAEGQAWpBguoANgIAIABBjAFqQcDpADYCACAAQYgBakGF6QA2AgAgAEGEAWpB7OgANgIAIABB+ABqQgE3AgAgAEH0AGpBADoAACAAQfAAakG55wA2AgAgAEHsAGpB8uYANgIAIABB6ABqQbjmADYCACAAQeQAakGg5gA2AgAgAEHYAGpCATcCACAAQdQAakEAOgAAIABB0ABqQe/kADYCACAAQcwAakG45AA2AgAgAEHIAGpB+eMANgIAIABBxABqQd/jADYCACAAQThqQgE3AgAgAEE0akEAOgAAIABBMGpB1uIANgIAIABBLGpBluIANgIAIABBKGpBz+EANgIAIABBJGpBuOEANgIAIABBuAFqQgE3AgAgAEG0AWpBADoAACAAQbABakHE7AA2AgAgAEGsAWpBkOwANgIAIABBqAFqQdbrADYCACAAQaQBakG86wA2AgAgAEEGNgKgASAAC9QDACAAQQY2AoACIABBBTYCgAEgAEEENgJgIABBAzYCQCAAQQI2AiAgAEIBNwIYIABBADoAFCAAQe/fADYCECAAQaffADYCDCAAQdjeADYCCCAAQbreADYCBCAAQQE2AgAgAEGYAWpCATcCACAAQZQBakEAOgAAIABBkAFqQYLqADYCACAAQYwBakHA6QA2AgAgAEGIAWpBhekANgIAIABBhAFqQezoADYCACAAQfgAakIBNwIAIABB9ABqQQA6AAAgAEHwAGpBuecANgIAIABB7ABqQfLmADYCACAAQegAakG45gA2AgAgAEHkAGpBoOYANgIAIABB2ABqQgE3AgAgAEHUAGpBADoAACAAQdAAakHv5AA2AgAgAEHMAGpBuOQANgIAIABByABqQfnjADYCACAAQcQAakHf4wA2AgAgAEE4akIBNwIAIABBNGpBADoAACAAQTBqQdbiADYCACAAQSxqQZbiADYCACAAQShqQc/hADYCACAAQSRqQbjhADYCACAAQbgBakIBNwIAIABBtAFqQQA6AAAgAEGwAWpBxOwANgIAIABBrAFqQZDsADYCACAAQagBakHW6wA2AgAgAEGkAWpBvOsANgIAIABBBjYCoAELSAECfyAAQQE2AoQCIAAoAoACIgJBAEoEQCAAQRRqIQADQCAAQQA6AAAgAEEIakEANgIAIABBIGohACABQQFqIgEgAkgNAAsLCwoAIAAgATYChAILfQEEfwJAIAAoAoACIgNBAEwNACAAKAKEAiEEA0ACQCAAKAIAIARHDQAgAEEUaiIFLQAADQAgAEEcaiICIAIoAgAgAWoiATYCACABIABBGGooAgAiA0gNAiAFQQE6AAAgAiADNgIADwsgAEEgaiEAIAJBAWoiAiADSA0ACwsLSwEDfwJAIAAoAoACIgJBAEwNACAAKAKEAiEDA0AgAyAAKAIARwRAIABBIGohACACQQFrIgINAQwCCwsgAEEUai0AAEEARyEBCyABC0UBA38gACgCgAIiAkEATARAQQAPCyAAKAKEAiEDAkADQCAAKAIAIANGDQEgAEEgaiEAIAFBAWoiASACSA0AC0EADwsgAAsfACAAQgA3AgAgAEEQakEANgIAIABBCGpCADcCACAACx0AIABCADcCACAAQRBqQQA2AgAgAEEIakIANwIACzUBAn8CQCABRQ0AIAAoAhAiA0EDSg0AQQEhAiAAIANBAWo2AhAgACADQQJ0aiABNgIACyACC4UBAQR/IAAoAhAiBEEASgRAIARBAWshBSAAIQMDQCABIAMoAgBGBEAgBEEBayIBIAJKBEAgBSACayECA0AgAyADQQRqIgMoAgA2AgAgAkEBayICDQALCyAAIAE2AhAgACABQQJ0akEANgIAQQEPCyADQQRqIQMgAkEB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AWogAzoAACABQQFqIgIgBE4NACABIAVqIQMgAiEBIAMtAAAiAw0BCwsgACACaiEACyAAQQA6AAALDwsgAEEAOgAAC8YBAQR/AkACQAJAQeCAASgCACICBEAgAkHkAWoQJQ0BCyAARSABQQBMcg0BIABBADoAAA8LQeCAASgCAEHkAWoQJSECIABFIAFBAExyDQAgAigCDCICRQ0BAkAgAUECSA0AIAItAAAiA0UNACABQQFrIQQgAkEBaiEFQQAhAQNAAkAgACABaiADOgAAIAFBAWoiAiAETg0AIAEgBWohAyACIQEgAy0AACIDDQELCyAAIAJqIQALIABBADoAAAsPCyAAQQA6AAALxgEBBH8CQAJAAkBB4IABKAIAIgIEQCACQeQBahAlDQELIABFIAFBAExyDQEgAEEAOgAADwtB4IABKAIAQeQBahAlIQIgAEUgAUEATHINACACKAIQIgJFDQECQCABQQJIDQAgAi0AACIDRQ0AIAFBAWshBCACQQFqIQVBACEBA0ACQCAAIAFqIAM6AAAgAUEBaiICIARODQAgASAFaiEDIAIhASADLQAAIgMNAQsLIAAgAmohAAsgAEEAOgAACw8LIABBADoAAAv2AQEDfwJAAkACQEHggAEoAgAiAwRAIANB5AFqECUNAQsgAUUgAkEATHINASABQQA6AAAPC0HggAEoAgBB5AFqECUhAwJAIABBAEgNACADKAIUIABMDQAgAUUgAkEATHINASADIABBDGxqQRhqKAIAIgNFDQICQCACQQJIDQAgAy0AACIARQ0AIAJBAWshBCADQQFqIQVBACECA0ACQCABIAJqIAA6AAAgAkEBaiIDIARODQAgAiAFaiEAIAMhAiAALQAAIgANAQsLIAEgA2ohAQsgAUEAOgAADwsgAUUgAkEATHINACABQQA6AAALDwsgAUEAOgAAC/YBAQN/AkACQAJAQeCAASgCACIDBEAgA0HkAWoQJQ0BCyABRSACQQBMcg0BIAFBADoAAA8LQeCAASgCAEHkAWoQJSEDAkAgAEEASA0AIAMoAhQgAEwNACABRSACQQBMcg0BIAMgAEEMbGpBHGooAgAiA0UNAgJAIAJBAkgNACADLQAAIgBFDQAgAkEBayEEIANBAWohBUEAIQIDQAJAIAEgAmogADoAACACQQFqIgMgBE4NACACIAVqIQAgAyECIAAtAAAiAA0BCwsgASADaiEBCyABQQA6AAAPCyABRSACQQBMcg0AIAFBADoAAAsPCyABQQA6AAALrAEBBH8CQAJAQeCAASgCACICRQRAIABFIAFBAExyDQEgAEEAOgAADwsgAEUgAUEATHINACACKAKgHSICRQ0BAkAgAUECSA0AIAItAAAiA0UNACABQQFrIQQgAkEBaiEFQQAhAQNAAkAgACABaiADOgAAIAFBAWoiAiAETg0AIAEgBWohAyACIQEgAy0AACIDDQELCyAAIAJqIQALIABBADoAAAsPCyAAQQA6AAALrAEBBH8CQAJAQeCAASgCACICRQRAIABFIAFBAExyDQEgAEEAOgAADwsgAEUgAUEATHINACACKAKkHSICRQ0BAkAgAUECSA0AIAItAAAiA0UNACABQQFrIQQgAkEBaiEFQQAhAQNAAkAgACABaiADOgAAIAFBAWoiAiAETg0AIAEgBWohAyACIQEgAy0AACIDDQELCyAAIAJqIQALIABBADoAAAsPCyAAQQA6AAALxgEBBH8CQAJAAkBB4IABKAIAIgIEQCACQfgaahA6DQELIABFIAFBAExyDQEgAEEAOgAADwtB4IABKAIAQfgaahA6IQIgAEUgAUEATHINACACKAIEIgJFDQECQCABQQJIDQAgAi0AACIDRQ0AIAFBAWshBCACQQFqIQVBACEBA0ACQCAAIAFqIAM6AAAgAUEBaiICIARODQAgASAFaiEDIAIhASADLQAAIgMNAQsLIAAgAmohAAsgAEEAOgAACw8LIABBADoAAAvGAQEEfwJAAkACQEHggAEoAgAiAgRAIAJB+BpqEDoNAQsgAEUgAUEATHINASAAQQA6AAAPC0HggAEoAgBB+BpqEDohAiAARSABQQBMcg0AIAIoAggiAkUNAQJAIAFBAkgNACACLQAAIgNFDQAgAUEBayEEIAJBAWohBUEAIQEDQAJAIAAgAWogAzoAACABQQFqIgIgBE4NACABIAVqIQMgAiEBIAMtAAAiAw0BCwsgACACaiEACyAAQQA6AAALDwsgAEEAOgAAC8YBAQR/AkACQAJAQeCAASgCACICBEAgAkH4GmoQOg0BCyAARSABQQBMcg0BIABBADoAAA8LQeCAASgCAEH4GmoQOiECIABFIAFBAExyDQAgAigCDCICRQ0BAkAgAUECSA0AIAItAAAiA0UNACABQQFrIQQgAkEBaiEFQQAhAQNAAkAgACABaiADOgAAIAFBAWoiAiAETg0AIAEgBWohAyACIQEgAy0AACIDDQELCyAAIAJqIQALIABBADoAAAsPCyAAQQA6AAALxgEBBH8CQAJAAkBB4IABKAIAIgIEQCACQfgaahA6DQELIABFIAFBAExyDQEgAEEAOgAADwtB4IABKAIAQfgaahA6IQIgAEUgAUEATHINACACKAIQIgJFDQECQCABQQJIDQAgAi0AACIDRQ0AIAFBAWshBCACQQFqIQVBACEBA0ACQCAAIAFqIAM6AAAgAUEBaiICIARODQAgASAFaiEDIAIhASADLQAAIgMNAQsLIAAgAmohAAsgAEEAOgAACw8LIABBADoAAAusAQEEfwJAAkBB4IABKAIAIgJFBEAgAEUgAUEATHINASAAQQA6AAAPCyACEEMhAiAARSABQQBMcg0AIAJFDQECQCABQQJIDQAgAi0AACIDRQ0AIAFBAWshBCACQQFqIQVBACEBA0ACQCAAIAFqIAM6AAAgAUEBaiICIARODQAgASAFaiEDIAIhASADLQAAIgMNAQsLIAAgAmohAAsgAEEAOgAACw8LIABBADoAAAs0AQJ/QdSAASgCACICIABBB2pBeHFqIgBBgICAAU0Ef0HUgAEgADYCACACQfCAAWoFIAELCwMAAQszAQF/IAIEQCAAIQMDQCADIAEtAAA6AAAgAUEBaiEBIANBAWohAyACQQFrIgINAAsLIAALKQEBfyACBEAgACEDA0AgAyABOgAAIANBAWohAyACQQFrIgINAAsLIAALdQEBfwJAIAAgAUkEQCACRQ0BIAAhAwNAIAMgAS0AADoAACABQQFqIQEgA0EBaiEDIAJBAWsiAg0ACwwBCyACRSAAIAFNcg0AIABBAWshAyABQQFrIQEDQCACIANqIAEgAmotAAA6AAAgAkEBayICDQALCyAAC0MBA38CQCACRQ0AA0AgAC0AACIEIAEtAAAiBUYEQCAAQQFqIQAgAUEBaiEBIAJBAWsiAg0BDAILCyAEIAVrIQMLIAMLKgECfyAARQRAQQAPCwNAIAAgAWohAiABQQFqIQEgAi0AAA0ACyABQQFrCxYAIABFIAFFckUEQCAAQQA6AAALQQALBAAgAAsDAAELC9V4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aGFpLgDgpKvgpLzgpJXgpYDgpLDgpKrgpYHgpLAg4KS44KWN4KSf4KWH4KS24KSoIOCkleClgCDgpLjgpYHgpKzgpLkuLi4g4KSq4KSf4KSw4KS/4KSv4KWL4KSCIOCkquCksCDgpLjgpLDgpY3gpKYg4KSV4KWL4KS54KSw4KS+IOCkm+CkvuCkr+CkviDgpLngpYjgpaQg4KSG4KScIOCkreClgCDgpJfgpLDgpK7gpL4t4KSX4KSw4KSuIOCkmuCkvuCkryDgpKzgpKjgpL7gpKjgpYAg4KS54KWI4KWkAGNoaW1lAExldCBtZSBzdGFydCB0aGUgZ2FzIGJ1cm5lciwgYm9pbCBmcmVzaCB3YXRlciwgYW5kIG1peCBpbiB0aGUgdGVhIGxlYXZlcyBhbmQgc3BpY2VzLgDgpJfgpYjgpLgg4KSa4KWC4KSy4KWN4KS54KS+IOCknOCksuCkvuCkpOCkviDgpLngpYLgpIEsIOCkquCkvuCkqOClgCDgpIngpKzgpL7gpLIg4KSV4KSwIOCkpOCkvuCknOCkvOClgCDgpJrgpL7gpK8g4KSq4KSk4KWN4KSk4KWAIOCklOCksCDgpK7gpLjgpL7gpLLgpYcg4KSh4KS+4KSy4KSk4KS+IOCkueClguCkgeClpABzdG92ZV9saWdodABLYXNoaWYA4KSV4KS+4KS24KS/4KSrAEJoYWl5YSEgR2l2ZSBtZSBvbmUgU2Ftb3NhIGFuZCBvbmUgS29raWxhIEtvbGEsIHF1aWNrbHkhIFRyYWluIGlzIGFib3V0IHRvIGFycml2ZSBvbiBQbGF0Zm9ybSAxLgDgpK3gpYjgpK/gpL4hIOCkruClgeCkneClhyDgpI/gpJUg4KS44KSu4KWL4KS44KS+IOCklOCksCDgpI/gpJUg4KSV4KWL4KSV4KS/4KSy4KS+IOCkleCli+CksuCkviDgpJzgpLLgpY3gpKbgpYAg4KSm4KWLISDgpKrgpY3gpLLgpYfgpJ/gpKvgpLzgpYngpLDgpY3gpK4gMSDgpKrgpLAg4KSX4KS+4KSh4KS84KWAIOCkhuCkqOClhyDgpLXgpL7gpLLgpYAg4KS54KWI4KWkAGJlbGwAV2FoISBUaGUgc2Ftb3NhIHRhc3RlcyBqdXN0IGxpa2UgYXV0aGVudGljIG9sZCByZWNpcGUuLi4gS2VlcCB0aGUgY2hhbmdlLCBSYW11IGJoYWl5YS4A4KS14KS+4KS5ISDgpLjgpK7gpYvgpLjgpYcg4KSV4KS+IOCkuOCljeCkteCkvuCkpiDgpLjgpJog4KSu4KWH4KSCIOCksuCkvuCknOCkteCkvuCkrCDgpLngpYguLi4g4KSb4KWB4KSf4KWN4KSf4KS+IOCksOCkliDgpLLgpYssIOCksOCkvuCkruClgiDgpK3gpYjgpK/gpL7gpaQAY29pbgBQcmVldADgpKrgpY3gpLDgpYDgpKQATmFtYXN0ZSBSYW11LWppISBQbGVhc2UgbWFrZSBtZSBhIGN1cCBvZiBzdHJvbmcgS2FkYWsgTWFzYWxhIENoYWkgd2l0aCBjcnVzaGVkIGdpbmdlciBhbmQgY2FyZGFtb20uAOCkqOCkruCkuOCljeCkpOClhyDgpLDgpL7gpK7gpYIg4KSc4KWAISDgpK7gpYfgpLDgpYcg4KSy4KS/4KSPIOCkj+CklSDgpJXgpKHgpLzgpJUg4KSu4KS44KS+4KSy4KS+IOCkmuCkvuCkryDgpKzgpKjgpL7gpKjgpL4sIOCkheCkpuCksOCklSDgpJTgpLAg4KSH4KSy4KS+4KSv4KSa4KWAIOCkleClguCknyDgpJXgpLDgpaQAQWgsIHRoaXMgY2hhaSB3YXJtcyB0aGUgc291bCBpbiB0aGlzIGNoaWxseSBzdGF0aW9uIG5pZ2h0LiBUaGFuayB5b3UhAOCkhuCkuSwg4KSH4KS4IOCkoOCkguCkoeClgCDgpLDgpL7gpKQg4KSu4KWH4KSCIOCkr+CkuSDgpJfgpLDgpK7gpL4t4KSX4KSw4KSuIOCkmuCkvuCkryDgpJzgpL7gpKgg4KSu4KWH4KSCIOCknOCkvuCkqCDgpLLgpYcg4KSG4KSI4KWkIOCkp+CkqOCljeCkr+CkteCkvuCkpiEAU2F1bXlhAOCkuOCljOCkruCljeCkr+CkvgBIZWxsbyEgQ291bGQgSSBwbGVhc2UgZ2V0IG9uZSBob3QgUmFpbHdheSBDb2ZmZWUgYW5kIGEgcGxhdGUgb2YgcGlwaW5nIGhvdCBGdWdnaSAyLW1pbnV0ZSBub29kbGVzPwDgpLjgpYHgpKjgpL/gpI8hIOCkruClgeCkneClhyDgpI/gpJUg4KSX4KSw4KWN4KSuIOCkleClieCkq+CkvOClgCDgpJTgpLAg4KSP4KSVIOCkquCljeCksuClh+CknyDgpKTgpL7gpJzgpLzgpL4g4KSr4KWB4KSX4KWN4KSX4KWAIOCkqOClguCkoeCksuCljeCkuCDgpK7gpL/gpLIg4KS44KSV4KSk4KWAIOCkueCliCDgpJXgpY3gpK/gpL4/AERlbGljaW91cyEgTm90aGluZyBiZWF0cyByYWlsd2F5IHN0YXRpb24gbm9vZGxlcyBhbmQgY29mZmVlIGF0IG1pZG5pZ2h0LgDgpKzgpLngpYHgpKQg4KSs4KSi4KS84KS/4KSv4KS+ISDgpIbgpKfgpYAg4KSw4KS+4KSkIOCkleCliyDgpLjgpY3gpJ/gpYfgpLbgpKgg4KSV4KWAIOCkq+ClgeCkl+CljeCkl+ClgCDgpJTgpLAg4KSV4KWJ4KSr4KS84KWAIOCkleCkviDgpJXgpYvgpIgg4KSu4KWB4KSV4KS+4KSs4KSy4KS+IOCkqOCkueClgOCkguClpABNeXN0ZXJpb3VzIFBhc3NlbmdlcgDgpLDgpLngpLjgpY3gpK/gpK7gpK/gpYAg4KSu4KWB4KS44KS+4KSr4KS84KS/4KSwAEdpdmUgbWUgYmxhY2sgdGVhIHdpdGhvdXQgbWlsay4uLiBhbmQgdGFrZSB0aGlzIDUwMCBydXBlZSB0aXAsIGNoYWl3YWxhLgDgpK7gpYHgpJ3gpYcg4KSs4KS/4KSo4KS+IOCkpuClguCkpyDgpJXgpYAg4KSV4KS+4KSy4KWAIOCkmuCkvuCkryDgpKbgpYsuLi4g4KSU4KSwIOCkr+ClhyA1MDAg4KSw4KWB4KSq4KSv4KWHIOCkleClgCDgpJ/gpYDgpKog4KSk4KWB4KSuIOCksOCkliDgpLLgpYssIOCkmuCkvuCkr+CkteCkvuCksuClh+ClpABlZXJpZQA1MDAgcnVwZWVzPyEgU2FoaWIsIHRoaXMgaXMgdG9vIG11Y2ggZm9yIGEgY3VwIG9mIHRlYSEANTAwIOCksOClgeCkquCkr+Clhz8hIOCkrOCkvuCkrOClguCknOClgCwg4KSP4KSVIOCkleCkqiDgpJrgpL7gpK8g4KSV4KWHIOCksuCkv+CkjyDgpIfgpKTgpKjgpL4g4KSs4KS54KWB4KSkIOCknOCkvOCljeCkr+CkvuCkpuCkviDgpLngpYghAABLZWVwIGl0IFJhbXUuLi4gZW5qb3kgeW91ciBsaWZlIHdoaWxlIHlvdSBzdGlsbCBjYW4uIE5vdCBldmVyeW9uZSBnZXRzIGEgc2Vjb25kIGNoYW5jZSBvbiBQbGF0Zm9ybSAyLgDgpLDgpJYg4KSy4KWLIOCksOCkvuCkruClgi4uLiDgpJzgpKwg4KSk4KSVIOCknOCkvOCkv+CkqOCljeCkpuCkl+ClgCDgpLngpYgg4KSk4KSsIOCkpOCklSDgpJzgpYAg4KSy4KWL4KWkIOCkquCljeCksuClh+Ckn+Ckq+CkvOClieCksOCljeCkriAyIOCkquCksCDgpLngpLAg4KSV4KS/4KS44KWAIOCkleCliyDgpKbgpYLgpLjgpLDgpL4g4KSu4KWM4KSV4KS+IOCkqOCkueClgOCkgiDgpK7gpL/gpLLgpKTgpL7gpaQAZGlzdGFudF9ob3JuAEkgc2VydmVkIGhpbSBzYW1vc2EgZWFybGllciwgdGhlbiBoZSB3YWxrZWQgdG93YXJkcyB0aGUgc3RhaXJzLgDgpK7gpYjgpILgpKjgpYcg4KSJ4KS44KWHIOCkuOCkruCli+CkuOCkviDgpKbgpL/gpK/gpL4g4KSl4KS+LCDgpKvgpL/gpLAg4KS14KWLIOCkuOClgOCkouCkvOCkv+Ckr+Cli+CkgiDgpJXgpYAg4KSk4KSw4KSrIOCkl+Ckr+CkvuClpABJIGhlYXJkIHN0cmFuZ2Ugc2NyZWFtcyBuZWFyIHRyYWNrIDIgYW4gaG91ciBhZ28uLi4A4KSu4KWB4KSd4KWHIOCkj+CklSDgpJjgpILgpJ/gpYcg4KSq4KS54KSy4KWHIOCkquCkn+CksOClgCDgpKjgpILgpKzgpLAgMiDgpLjgpYcg4KSa4KWA4KSW4KSo4KWHIOCkleClgCDgpIbgpLXgpL7gpJzgpLwg4KSG4KSIIOCkpeClgC4uLgBBoDELtB8NFwAATRcAADMAAADUFwAACBgAADQAAABJbnNwZWN0b3IgU2hhcm1hAOCkh+CkguCkuOCljeCkquClh+CkleCljeCkn+CksCDgpLbgpLDgpY3gpK7gpL4AQ2hhaXdhbGEhIEhhdmUgeW91IHNlZW4gcGFzc2VuZ2VyIEthc2hpZj8gSGlzIGx1Z2dhZ2Ugd2FzIGxlZnQgaW5zaWRlIHRoZSBjYXJyaWFnZSwgYnV0IGhlIHZhbmlzaGVkLgDgpJrgpL7gpK/gpLXgpL7gpLLgpYchIOCkpOClgeCkruCkqOClhyDgpJXgpL7gpLbgpL/gpKsg4KSV4KWLIOCkpuClh+CkluCkviDgpLngpYg/IOCkieCkuOCkleCkviDgpLjgpL7gpK7gpL7gpKgg4KSs4KWL4KSX4KWAIOCkruClh+CkgiDgpJvgpYLgpJ8g4KSX4KSv4KS+LCDgpKrgpLAg4KS14KWLIOCkluClgeCkpiDgpJfgpL7gpK/gpKwg4KS54KWI4KWkAHBvbGljZV93aGlzdGxlAEJlaGluZCB0aGUgc3RhaXJzPyBXZSBqdXN0IGZvdW5kIGJsb29kc3RhaW5zIG5lYXIgdGhlIGdhcmJhZ2UgYmlucy4gU3RheSBhbGVydCEA4KS44KWA4KSi4KS84KS/4KSv4KWL4KSCIOCkleClhyDgpKrgpYDgpJvgpYc/IOCkueCkruClh+CkgiDgpLXgpLngpL7gpIEg4KSV4KSa4KSw4KWHIOCkleClhyDgpKHgpL/gpKzgpY3gpKzgpYcg4KSV4KWHIOCkquCkvuCkuCDgpJbgpYLgpKgg4KSV4KWHIOCkp+CkrOCljeCkrOClhyDgpK7gpL/gpLLgpYcg4KS54KWI4KSC4KWkIOCkuOCkpOCksOCljeCklSDgpLDgpLngpKjgpL4hAHNpcmVuAFRyYWNrIDI/ISBHb29kIGhlYXZlbnMuLi4gdGhlcmUncyBhIHNpbGhvdWV0dGUgbHlpbmcgb24gdGhlIHJhaWxzISBFdmVyeW9uZSBzdGF5IGJhY2shAOCkquCkn+CksOClgCDgpKjgpILgpKzgpLAgMj8hIOCkueClhyDgpK3gpJfgpLXgpL7gpKguLi4g4KSq4KSf4KSw4KS/4KSv4KWL4KSCIOCkquCksCDgpJXgpYvgpIgg4KSX4KS/4KSw4KS+IOCkueClgeCkhiDgpLngpYghIOCkleCli+CkiCDgpIbgpJfgpYcg4KSu4KSkIOCkrOCkouCkvOCkqOCkviEAZHJhbWF0aWNfY2hvcmQASSBrbm93IHlvdS4uLiDgpK7gpYjgpIIg4KSk4KWB4KSd4KWHIOCknOCkvuCkqOCkpOCkviDgpLngpYLgpIIuLi4gWW91IGFyZSB0aGUgc2FtZSBndXkgd2hvIGdhdmUgbWUgc3VjaCBhIGh1Z2UgdGlwIQDgpK7gpYjgpIIg4KSk4KWB4KSd4KWHIOCknOCkvuCkqOCkpOCkviDgpLngpYLgpIIuLi4g4KSF4KSw4KWHIOCkpOClgeCkriDgpKTgpYsg4KS14KS54KWAIOCkueCliyDgpJzgpL/gpLjgpKjgpYcg4KSu4KWB4KSd4KWHIOCkh+CkpOCkqOClgCDgpKzgpKHgpLzgpYAg4KSf4KWA4KSqIOCkpuClgCDgpKXgpYAhAHN1c3BlbnNlAFlvdSBhcmUgYmVoaW5kIGFsbCB0aG9zZSBtdXJkZXJzIHJpZ2h0PyBXaHkgYXJlIHlvdSBkb2luZyB0aGlzIHRvIG1lPyEgV2h5IGhhdmUgeW91IHRpZWQgbWUgdXA/AOCkpOClgeCkriDgpLngpYAg4KS54KWLIOCkqOCkviDgpIfgpKgg4KS44KSsIOCkleCkpOCljeCksiDgpJXgpYcg4KSq4KWA4KSb4KWHPyDgpK7gpYfgpLDgpYcg4KS44KS+4KSlIOCkkOCkuOCkviDgpJXgpY3gpK/gpYvgpIIg4KSV4KSwIOCksOCkueClhyDgpLngpYs/ISDgpK7gpYHgpJ3gpYcg4KSq4KSf4KSw4KS/4KSv4KWL4KSCIOCkquCksCDgpJXgpY3gpK/gpYvgpIIg4KSs4KS+4KSC4KSn4KS+IOCkueCliD8AVGhlIEtpbGxlciAoVGhlIFNvbikA4KSs4KSm4KSy4KS+IOCksuClh+CkqOClhyDgpLXgpL7gpLLgpL4gKOCkrOClh+Ckn+CkvikAWW91IGRvbid0IHJlbWVtYmVyIG1lLi4uIEJ1dCB5b3UgbWlnaHQgcmVtZW1iZXIgbXkgZmF0aGVyIQrgpKTgpYHgpK7gpY3gpLngpYfgpIIg4KSu4KWI4KSCIOCkpOCliyDgpK/gpL7gpKYg4KSo4KS54KWA4KSCIOCksOCkueClguCkguCkl+Ckvi4uLiDgpKrgpLAg4KSu4KWH4KSw4KWHIOCkquCkvuCkquCkviDgpKTgpYsg4KSv4KS+4KSmIOCkueCli+CkguCkl+ClhyDgpLngpYAuLi4A4KSk4KWB4KSu4KWN4KS54KWH4KSCIOCkruCliOCkgiDgpKTgpYsg4KSv4KS+4KSmIOCkqOCkueClgOCkgiDgpLDgpLngpYLgpILgpJfgpL4uLi4g4KSq4KSwIOCkruClh+CksOClhyDgpKrgpL7gpKrgpL4g4KSk4KWLIOCkr+CkvuCkpiDgpLngpYvgpILgpJfgpYcg4KS54KWALi4uAGRhcmtfcHVsc2UAV2hhdCBkaWQgeW91IHNheSB0byBoaW0gd2hlbiBoZSB3YXMgaHVuZ3J5PyAnWW91IGFyZSBVU0VMRVNTIScK4KSV4KWN4KSv4KS+IOCkleCkueCkviDgpKXgpL4g4KSk4KWB4KSu4KSo4KWHIOCkieCkqOCkleCliz8gJ+CkpOClgeCkriDgpJXgpL/gpLjgpYAg4KSV4KS+4KSuIOCkleClhyDgpKjgpLngpYDgpIIg4KS54KWLIScA4KSV4KWN4KSv4KS+IOCkleCkueCkviDgpKXgpL4g4KSk4KWB4KSu4KSo4KWHIOCkieCkqOCkleCliz8gJ+CkpOClgeCkriDgpJXgpL/gpLjgpYAg4KSV4KS+4KSuIOCkleClhyDgpKjgpLngpYDgpIIg4KS54KWLIScARm9yIGp1c3QgMTUgcnVwZWVzIHlvdSBodW1pbGlhdGVkIGFuIG9sZCBkeWluZyBtYW4hCuCkuOCkv+CksOCljeCkqyAxNSDgpLDgpYHgpKrgpK/gpYcg4KSV4KWHIOCksuCkv+CkjyDgpKTgpYHgpK7gpKjgpYcg4KSJ4KSo4KSV4KWLIOCknOCkvOCksuClgOCksiDgpJXgpL/gpK/gpL4uLi4A4KS44KS/4KSw4KWN4KSrIDE1IOCksOClgeCkquCkr+ClhyDgpJXgpYcg4KSy4KS/4KSPIOCkpOClgeCkruCkqOClhyDgpIngpKjgpJXgpYsg4KSc4KS84KSy4KWA4KSyIOCkleCkv+Ckr+Ckvi4uLgBIZSBoYWQgdGVhcnMgaW4gaGlzIGV5ZXMuLi4gYW5kIGp1bXBlZCByaWdodCBpbiBmcm9udCBvZiB0aGUgZXhwcmVzcyB0cmFpbi4uLiBCZWNhdXNlIG9mIFlPVSEK4KS14KWLIOCksOCli+CkpOClhyDgpLngpYHgpI8g4KSf4KWN4KSw4KWH4KSoIOCkleClhyDgpLjgpL7gpK7gpKjgpYcg4KSV4KWC4KSmIOCkl+Ckjy4uLiDgpKTgpYHgpK7gpY3gpLngpL7gpLDgpYAg4KS14KSc4KS5IOCkuOClhyEA4KS14KWLIOCksOCli+CkpOClhyDgpLngpYHgpI8g4KSf4KWN4KSw4KWH4KSoIOCkleClhyDgpLjgpL7gpK7gpKjgpYcg4KSV4KWC4KSmIOCkl+Ckjy4uLiDgpKTgpYHgpK7gpY3gpLngpL7gpLDgpYAg4KS14KSc4KS5IOCkuOClhyEAdHJhaW5faG9ybl9uZWFyAE5PIFBMRUFTRS4uLiBJIEFNIFNPUlJZISBJIGRpZG4ndCBtZWFuIHRvISBJIHdhcyBzdHJlc3NlZCBhbmQgYnJva2UgYmFjayB0aGVuIQrgpKjgpLngpYDgpIIuLi4g4KSu4KWB4KSd4KWHIOCkruCkvuCkq+CkvCDgpJXgpLAg4KSm4KWLISDgpK7gpYfgpLDgpL4g4KS14KWLIOCkruCkpOCksuCkrCDgpKjgpLngpYDgpIIg4KSl4KS+Li4uAOCkqOCkueClgOCkgi4uLiDgpK7gpYHgpJ3gpYcg4KSu4KS+4KSr4KS8IOCkleCksCDgpKbgpYshIOCkruClh+CksOCkviDgpLXgpYsg4KSu4KSk4KSy4KSsIOCkqOCkueClgOCkgiDgpKXgpL4uLi4AW1N0cnVnZ2xlIHdpdGggcm9wZXNdIFRyeSB0byBsb29zZW4gdGhlIGtub3QgdXNpbmcgdGhlIHN0YXRpb24ga25pZmUhAFvgpLDgpLjgpY3gpLjgpL/gpK/gpL7gpIIg4KSb4KWB4KSh4KS84KS+4KSTXSDgpJzgpYfgpKwg4KSu4KWH4KSCIOCksOCkluClhyDgpJrgpL7gpJXgpYIg4KS44KWHIOCksOCkuOCljeCkuOClgCDgpJXgpL7gpJ/gpKjgpYcg4KSV4KWAIOCkleCli+CktuCkv+CktiDgpJXgpLDgpYshAFtBcG9sb2dpemUgc2luY2VyZWx5XSBPZmZlciB0aGUgb2xkIG1lZGFsIGFuZCBwcmF5IGZvciBmb3JnaXZlbmVzcyEAW+CkuOCkmuCljeCkmuClgCDgpK7gpL7gpKvgpLzgpYBdIOCkquClgeCksOCkvuCkqOClgCDgpK/gpL7gpKbgpYfgpIIg4KSU4KSwIOCkquCljeCksOCkvuCkr+CktuCljeCkmuCkv+CkpCDgpJXgpYAg4KSX4KWB4KS54KS+4KSwIOCksuCkl+CkvuCkkyEAW1NjcmVhbSBmb3IgSGVscF0gQWxlcnQgSW5zcGVjdG9yIFNoYXJtYSBhbmQgdGhlIG1pZG5pZ2h0IHN0YXRpb24gZ3VhcmQhAFvgpK7gpKbgpKYg4KSV4KWHIOCksuCkv+CkjyDgpJrgpL/gpLLgpY3gpLLgpL7gpJNdIOCkh+CkguCkuOCljeCkquClh+CkleCljeCkn+CksCDgpLbgpLDgpY3gpK7gpL4g4KSU4KSwIOCkl+CkvuCksOCljeCkoSDgpJXgpYsg4KSG4KS14KS+4KSc4KS8IOCksuCkl+CkvuCkkyEAQeDQAAvyL7IlAAD4JQAAbgAAAJomAADeJgAAbwAAAG4nAAC3JwAAcAAAAFNIVVQgVVAhIOCkmuClgeCkqiEKRGVhdGggaXMgdG9vIGVhc3kgZm9yIHlvdS4gWW91IHdpbGwgZGllIGV4YWN0bHkgbGlrZSBob3cgbXkgZmF0aGVyIGRpZWQhAOCkmuClgeCkqiEK4KSk4KWB4KSu4KWN4KS54KS+4KSw4KWAIOCkuOCknOCkvOCkviDgpJXgpYcg4KSy4KS/4KSPIOCkruCljOCkpCDgpKzgpLngpYHgpKQg4KSG4KS44KS+4KSoIOCkueCliC4uLiDgpKTgpYHgpK4g4KS14KWI4KS44KWHIOCkueClgCDgpK7gpLDgpYvgpJfgpYcg4KSc4KWI4KS44KWHIOCkruClh+CksOClhyDgpKrgpL7gpKrgpL4g4KSu4KS+4KSw4KWHIOCkl+CkjyEAdHJhaW5fcnVtYmxlAFRoZSBrbm90IGJyb2tlISBSYW11IHJvbGxzIGF3YXkganVzdCBhcyB0aGUgbWlkbmlnaHQgZnJlaWdodCB0cmFpbiByb2FycyBwYXN0IHRyYWNrIDIsIGxlYXZpbmcgdGhlIGtpbGxlciBzdHVubmVkIQDgpLDgpLjgpY3gpLjgpYAg4KSV4KSfIOCkl+CkiCEg4KSc4KWI4KS44KWHIOCkueClgCDgpK7gpL7gpLLgpJfgpL7gpKHgpLzgpYAg4KSX4KWB4KSc4KS84KSw4KWALCDgpLDgpL7gpK7gpYIg4KSq4KSf4KSw4KWAIOCkuOClhyDgpLngpJ8g4KSX4KSv4KS+IOCklOCksCDgpIXgpKrgpKjgpYAg4KSc4KS+4KSoIOCkrOCkmuCkviDgpLLgpYAhAHZpY3RvcnlfY2hvcmQAVGhlIGtpbGxlciBwYXVzZXMuLi4gc2VlaW5nIHlvdXIgZ2VudWluZSB0ZWFycyBhbmQgcmVncmV0LiBIZSBkcm9wcyB0aGUgaXJvbiBiYXIgYW5kIGRpc2FwcGVhcnMgaW50byB0aGUgZm9nZ3kgc3RhdGlvbiBuaWdodC4A4KS54KSk4KWN4KSv4KS+4KSw4KWHIOCkleClhyDgpLngpL7gpKUg4KSV4KS+4KSC4KSqIOCkieCkoOClhy4uLiDgpKTgpYHgpK7gpY3gpLngpL7gpLDgpYAg4KSG4KSB4KSW4KWL4KSCIOCkruClh+CkgiDgpKrgpLbgpY3gpJrgpL7gpKTgpL7gpKog4KSm4KWH4KSW4KSV4KSwIOCkieCkuOCkqOClhyDgpLngpKXgpL/gpK/gpL7gpLAg4KSr4KWH4KSC4KSVIOCkpuCkv+Ckr+CkviDgpJTgpLAg4KSV4KWL4KS54KSw4KWHIOCkruClh+CkgiDgpJPgpJ3gpLIg4KS54KWLIOCkl+Ckr+CkvuClpABtZWxhbmNob2x5X3BpYW5vAFBvbGljZSB3aGlzdGxlIGJsb3dzISAnSEFMVCEgSGFuZHMgaW4gdGhlIGFpciEnIFRoZSBwb2xpY2Ugc3Vycm91bmQgcGxhdGZvcm0gMiBhbmQgYXJyZXN0IHRoZSBraWxsZXIgaW4gdGhlIG5pY2sgb2YgdGltZSEA4KSq4KWB4KSy4KS/4KS4IOCkleClgCDgpLjgpYDgpJ/gpYAg4KSs4KSc4KWAISAn4KSw4KWB4KSVIOCknOCkvuCkkywg4KS54KS+4KSlIOCkiuCkquCksCDgpJXgpLDgpYshJyDgpKrgpYHgpLLgpL/gpLgg4KSo4KWHIOCkoOClgOCklSDgpLXgpJXgpY3gpKQg4KSq4KSwIOCkhuCkleCksCDgpLngpKTgpY3gpK/gpL7gpLDgpYcg4KSV4KWLIOCkp+CksCDgpKbgpKzgpYvgpJrgpL4hAHBvbGljZV9zaXJlbgDgpKjgpYLgpKHgpLIg4KSU4KSwIOCkruCkuOCkvuCksuCkviDgpIngpKDgpL7gpI/gpIIgLyBUQUtFIEJSSUNLICYgTUFTQUxBAOCkmuCkvuCkleClgiDgpLjgpYcg4KSq4KWI4KSV4KWH4KSfIOCkleCkvuCkn+Clh+CkgiAvIENVVCBQQUNLRVQA4KSr4KWB4KSX4KWN4KSX4KWAIOCkquCliOCkleClh+CknyDgpLDgpJbgpYfgpIIgLyBQTEFDRSBGVUdHSSBQQUNLRVQAVGFrZSBub29kbGUgYnJpY2sgJiB0YXN0ZW1ha2VyAFBhY2tldCBwbGFjZWQgLSBDbGljayBrbmlmZSB0byBjdXQAUGxhY2UgRnVnZ2kgcGFja2V0IGhlcmUATW9ybmluZyBSdXNoOiBCcmV3IEthZGFrIENoYWkA4KS44KWB4KSs4KS5IOCkleClgCDgpLbgpYHgpLDgpYHgpIbgpKQ6IOCkleCkoeCkvOCklSDgpJrgpL7gpK8g4KSs4KSo4KS+4KSP4KSCAEFkZCB0ZWEgbGVhdmVzLCBtaWxrLCBnaW5nZXIgJiBzdWdhciB0byBwb3QsIGJvaWwgYW5kIHBvdXIgaW50byBLdWxoYWQuAOCkquCkpOClgOCksuClhyDgpK7gpYfgpIIg4KSq4KS+4KSo4KWALCDgpKbgpYLgpKcsIOCkmuCkvuCkryDgpKrgpKTgpY3gpKTgpYAsIOCkheCkpuCksOCklSDgpJTgpLAg4KSa4KWA4KSo4KWAIOCkoeCkvuCksuCkleCksCDgpIngpKzgpL7gpLLgpYfgpIIg4KSU4KSwIOCkleClgeCksuCljeCkueCkoeCkvCDgpK7gpYfgpIIg4KSt4KSw4KWH4KSC4KWkAFNlcnZlIFBhc3NlbmdlciBLYXNoaWYA4KSv4KS+4KSk4KWN4KSw4KWAIOCkleCkvuCktuCkv+CkqyDgpJXgpYsg4KSo4KS+4KS24KWN4KSk4KS+IOCkpuClh+CkggBQYWNrIDEgU2Ftb3NhIGFuZCAxIEtva2lsYSBLb2xhIG9udG8gdHJheSBhbmQgc2VydmUgYXQgY291bnRlci4A4KSf4KWN4KSw4KWHIOCkruClh+CkgiAxIOCkuOCkruCli+CkuOCkviDgpJTgpLAgMSDgpJXgpYvgpJXgpL/gpLLgpL4g4KSV4KWL4KSy4KS+IOCksOCkluCkleCksCDgpJXgpL7gpIngpKjgpY3gpJ/gpLAg4KSq4KSwIOCkpuClh+CkguClpABNaWRuaWdodCBPcmRlciBmb3IgU2F1bXlhAOCkhuCkp+ClgCDgpLDgpL7gpKQg4KSV4KS+IOCkkeCksOCljeCkoeCksDog4KS44KWM4KSu4KWN4KSv4KS+AEJyZXcgUmFpbHdheSBDb2ZmZWUgaW4gbWFjaGluZSBhbmQgY29vayBGdWdnaSBub29kbGVzLgDgpJXgpYngpKvgpLzgpYAg4KSu4KS24KWA4KSoIOCkuOClhyDgpJXgpYngpKvgpLzgpYAg4KSs4KSo4KS+4KSP4KSCIOCklOCksCDgpKvgpYHgpJfgpY3gpJfgpYAg4KSo4KWC4KSh4KSy4KWN4KS4IOCkquCkleCkvuCkleCksCDgpKrgpY3gpLLgpYfgpJ8g4KSu4KWH4KSCIOCkquCksOCli+CkuOClh+CkguClpABJbnZlc3RpZ2F0ZSB0aGUgU3RhdGlvbgDgpLjgpY3gpJ/gpYfgpLbgpKgg4KSV4KWAIOCkm+CkvuCkqOCkrOClgOCkqCDgpJXgpLDgpYfgpIIAQ2hlY2sgZ2FyYmFnZSBhcmVhIGJlaGluZCBzdGFpcnMgYW5kIHJlYWQgdGhlIHRvcm4gbmV3c3BhcGVyIGNsaXBwaW5nLgDgpLjgpYDgpKLgpLzgpL/gpK/gpYvgpIIg4KSV4KWHIOCkquClgOCkm+ClhyDgpJXgpJrgpLDgpYcg4KSV4KWHIOCkoeCkv+CkrOCljeCkrOClhyDgpJXgpYAg4KSc4KS+4KSC4KSaIOCkleCksOClh+CkgiDgpJTgpLAg4KSr4KSf4KS+IOCkueClgeCkhiDgpIXgpJbgpKzgpL7gpLAg4KSq4KSi4KS84KWH4KSC4KWkAFRoZSBTaGFkb3cgb24gUGxhdGZvcm0gMgDgpKrgpY3gpLLgpYfgpJ/gpKvgpLzgpYngpLDgpY3gpK4gMiDgpJXgpL4g4KSw4KS54KS44KWN4KSvAENvbmZyb250IHRoZSBkYXJrIHNpbGhvdWV0dGUgYmVmb3JlIHRoZSBtaWRuaWdodCBleHByZXNzIGFycml2ZXMuAOCkhuCkp+ClgCDgpLDgpL7gpKQg4KSV4KWAIOCkj+CkleCljeCkuOCkquCljeCksOClh+CkuCDgpIbg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4KS44KSu4KSvLCDgpLjgpYzgpK7gpY3gpK/gpL4g4KSV4KS+IOCkkeCksOCljeCkoeCksOClpABTaGlmdCA0OiBDb2xkIE5pZ2h0LiBBbiB1bnNldHRsaW5nIHByZXNlbmNlLi4uAOCkmuCljOCkpeCkviDgpKrgpLngpLA6IOCkuOCksOCljeCkpiDgpLDgpL7gpKTgpaQg4KSP4KSVIOCkheCknOClgOCkrCDgpLjgpL4g4KS44KS+4KSv4KS+Li4uAFNoaWZ0IDU6IE1pZG5pZ2h0IE15c3RlcnkhIEluc3BlY3RvciBvbiBwbGF0Zm9ybS4A4KSq4KS+4KSB4KSa4KS14KS+4KSBIOCkquCkueCksDog4KSG4KSn4KWAIOCksOCkvuCkpCDgpJXgpL4g4KS44KSo4KWN4KSo4KS+4KSf4KS+IOCklOCksCDgpKrgpYHgpLLgpL/gpLgg4KSV4KWAIOCkquClguCkm+CkpOCkvuCkm+ClpABTaGlmdCA2OiBUaGUgQ29uZnJvbnRhdGlvbiBvbiBUcmFjayAyIQDgpJvgpKDgpL4g4KSq4KS54KSwOiDgpKrgpJ/gpLDgpYAg4KSo4KSC4KSs4KSwIDIg4KSq4KSwIOCkrOCkpuCksuCkviDgpJTgpLAg4KSu4KWM4KSkIOCkleClgCDgpKbgpL7gpLjgpY3gpKTgpL7gpKghAFlvdSBlc2NhcGVkIHRoZSB0cmFja3MgaW4gdGltZSEA4KSG4KSqIOCkuOCkruCkryDgpLDgpLngpKTgpYcg4KSq4KSf4KSw4KWAIOCkuOClhyDgpKzgpJog4KSo4KS/4KSV4KSy4KWHIQBGb3JnaXZlbmVzcyB0b3VjaGVkIHRoZSBraWxsZXIncyBoZWFydC4A4KS54KSk4KWN4KSv4KS+4KSw4KWHIOCkleCkviDgpKbgpL/gpLIg4KSq4KS/4KSY4KSyIOCkl+Ckr+CkviDgpJTgpLAg4KSJ4KS44KSo4KWHIOCkhuCkquCkleCliyDgpJvgpYvgpKHgpLwg4KSm4KS/4KSv4KS+4KWkAFBvbGljZSBhcHByZWhlbmRlZCB0aGUgY3VscHJpdCEA4KSq4KWB4KSy4KS/4KS4IOCkqOClhyDgpLngpKTgpY3gpK/gpL7gpLDgpYcg4KSV4KWLIOCkl+Ckv+CksOCkq+CljeCkpOCkvuCksCDgpJXgpLAg4KSy4KS/4KSv4KS+IQACAAAAAgAAAAMAAAAEAAAABQAAAIY7AADwOwAAfTwAAAk9AADBPQAAsDsAABk8AACsPAAAOz0AAOg9AAAKAAAAHgAAACgAAAAyAAAAZAAAAFw+AADGPgAAaj8AAHw+AADuPgAAij8AQdSAAQsBEAAvCXByb2R1Y2VycwEMcHJvY2Vzc2VkLWJ5AQVjbGFuZw8xMC4wLjAtNHVidW50dTE=";
+
+    // Sound Synthesizer via Web Audio API
+    class AudioSynthesizer {
+        constructor() {
+            this.ctx = null;
+            this.enabled = true;
+        }
+
+        init() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        }
+
+        playChime() {
+            if (!this.enabled || !this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, now); // D5
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.3); // A5
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.8);
+        }
+
+        playStoveIgnite() {
+            if (!this.enabled || !this.ctx) return;
+            const now = this.ctx.currentTime;
+            // Whoosh + click
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(140, now);
+            osc.frequency.exponentialRampToValueAtTime(60, now + 0.25);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.25);
+        }
+
+        playPour() {
+            if (!this.enabled || !this.ctx) return;
+            const now = this.ctx.currentTime;
+            // Pink noise stream
+            const bufferSize = this.ctx.sampleRate * 0.4;
+            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.6));
+            }
+            const noise = this.ctx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(800, now);
+            filter.frequency.linearRampToValueAtTime(1400, now + 0.4);
+            const gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.ctx.destination);
+            noise.start(now);
+        }
+
+        playCoins() {
+            if (!this.enabled || !this.ctx) return;
+            const now = this.ctx.currentTime;
+            [1760, 2637, 3520].forEach((freq, idx) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                gain.gain.setValueAtTime(0.25, now + idx * 0.08);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.2);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now + idx * 0.08);
+                osc.stop(now + idx * 0.08 + 0.2);
+            });
+        }
+
+        playTrainHorn() {
+            if (!this.enabled || !this.ctx) return;
+            const now = this.ctx.currentTime;
+            // Classic dual chord horn (Indian Railways WAP-7 style)
+            [293.66, 369.99, 440.0].forEach(f => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(f, now);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 1.8);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 1.8);
+            });
+        }
+
+        playEerieDrone() {
+            if (!this.enabled || !this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(65.4, now); // C2
+            osc.frequency.linearRampToValueAtTime(55.0, now + 2.5);
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 2.5);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 2.5);
+        }
+
+        playBuzzer() {
+            if (!this.enabled || !this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(130, now);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+    }
+
+    // Master Game Controller & WebAssembly Bridge
+    class RailwayChaiWala {
+        constructor() {
+            this.wasm = null;
+            this.memory = null;
+            this.audio = new AudioSynthesizer();
+            this.canvas = document.getElementById('gameCanvas');
+            this.ctx = this.canvas.getContext('2d');
+            this.heldItem = 0; // Empty
+            this.clockHours = 5;
+            this.clockMinutes = 30;
+            this.trainPosition = -200;
+            this.steamParticles = [];
+        }
+
+        async init() {
+            // Instantiate WebAssembly from embedded base64
+            const binStr = atob(WASM_BASE64);
+            const len = binStr.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binStr.charCodeAt(i);
+            }
+
+            const wasmModule = await WebAssembly.instantiate(bytes, {});
+            this.wasm = wasmModule.instance.exports;
+            this.memory = new Uint8Array(this.wasm.memory.buffer);
+
+            // Initialize game engine
+            this.wasm.rcw_init();
+
+            // Set up particles
+            for (let i = 0; i < 40; i++) {
+                this.steamParticles.push({
+                    x: 230 + (Math.random() * 30 - 15),
+                    y: 220 + Math.random() * 40,
+                    vx: (Math.random() - 0.5) * 0.8,
+                    vy: -1.2 - Math.random() * 1.5,
+                    alpha: Math.random() * 0.6,
+                    radius: 3 + Math.random() * 8
+                });
+            }
+
+            // Setup listeners
+            this.setupKeyboard();
+            this.updateUI();
+
+            // Start main game loop
+            let lastTime = performance.now();
+            const loop = (time) => {
+                const dt = Math.min((time - lastTime) / 1000, 0.1);
+                lastTime = time;
+                this.update(dt);
+                this.render();
+                requestAnimationFrame(loop);
+            };
+            requestAnimationFrame(loop);
+        }
+
+        update(dt) {
+            if (!this.wasm) return;
+            this.wasm.rcw_update(dt);
+
+            // Audio event polling
+            const buf = 1024;
+            this.wasm.rcw_pop_audio_event(buf, 128);
+            const audioEvent = this.readString(buf);
+            if (audioEvent) {
+                this.handleAudioCue(audioEvent);
+            }
+
+            // Clock update
+            this.clockMinutes += dt * 4;
+            if (this.clockMinutes >= 60) {
+                this.clockMinutes = 0;
+                this.clockHours = (this.clockHours + 1) % 24;
+            }
+
+            // Train movement on tracks
+            this.trainPosition += dt * 35;
+            if (this.trainPosition > this.canvas.width + 300) {
+                this.trainPosition = -350;
+            }
+
+            // Steam particles update
+            const potCooking = this.wasm.rcw_is_burner_on() && this.wasm.rcw_get_pot_temp() > 60;
+            this.steamParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= dt * 0.4;
+                p.radius += dt * 5;
+                if (p.alpha <= 0 || p.y < 120) {
+                    p.x = 230 + (Math.random() * 26 - 13);
+                    p.y = 240;
+                    p.vx = (Math.random() - 0.5) * 0.7;
+                    p.vy = -1.2 - Math.random() * 1.5;
+                    p.alpha = potCooking ? (0.4 + Math.random() * 0.4) : 0;
+                    p.radius = 4;
+                }
+            });
+
+            this.updateUI();
+        }
+
+        readString(ptr) {
+            if (!this.memory) return '';
+            let s = '';
+            for (let i = ptr; this.memory[i] !== 0; i++) {
+                s += String.fromCharCode(this.memory[i]);
+            }
+            return decodeURIComponent(escape(s));
+        }
+
+        handleAudioCue(cue) {
+            this.audio.init();
+            if (cue === 'stove_ignite') this.audio.playStoveIgnite();
+            else if (cue === 'chai_pour') this.audio.playPour();
+            else if (cue === 'coins_clink') this.audio.playCoins();
+            else if (cue === 'bell' || cue === 'chime') this.audio.playChime();
+            else if (cue.includes('horn')) this.audio.playTrainHorn();
+            else if (cue === 'suspense' || cue === 'dark_pulse' || cue === 'eerie') this.audio.playEerieDrone();
+            else if (cue === 'wrong_buzzer' || cue === 'buzz') this.audio.playBuzzer();
+        }
+
+        updateUI() {
+            if (!this.wasm) return;
+
+            // Badges
+            const shift = this.wasm.rcw_get_shift();
+            const shiftNames = ['', '1 (Dawn)', '2 (Noon Rush)', '3 (Dusk)', '4 (Cold Night)', '5 (Midnight)', '6 (The Climax)'];
+            document.getElementById('shiftBadge').textContent = shiftNames[shift] || shift;
+            document.getElementById('rupeesBadge').textContent = '₹ ' + this.wasm.rcw_get_rupees();
+            
+            const hh = String(Math.floor(this.clockHours)).padStart(2, '0');
+            const mm = String(Math.floor(this.clockMinutes)).padStart(2, '0');
+            const ampm = this.clockHours >= 12 ? 'PM' : 'AM';
+            document.getElementById('clockBadge').textContent = `${hh}:${mm} ${ampm}`;
+
+            // Pot status
+            const temp = this.wasm.rcw_get_pot_temp();
+            const prog = this.wasm.rcw_get_pot_progress();
+            const isCooked = this.wasm.rcw_is_pot_cooked();
+            const isBurned = this.wasm.rcw_is_pot_burned();
+            const burnerOn = this.wasm.rcw_is_burner_on();
+
+            document.getElementById('potTemp').textContent = temp.toFixed(0) + '°C';
+            document.getElementById('potProgress').style.width = prog.toFixed(0) + '%';
+            
+            let statusText = 'Empty Pot / खाली पतीला';
+            if (isBurned) statusText = '🔥 BURNT! / जल गया!';
+            else if (isCooked) statusText = '✅ Ready to Pour / तैयार है!';
+            else if (burnerOn && temp > 80) statusText = '♨️ Boiling Chai / चाय उबल रही है...';
+            else if (burnerOn) statusText = '🔥 Heating up / गर्म हो रहा है...';
+            document.getElementById('potStatus').textContent = statusText;
+            document.getElementById('btnBurner').textContent = burnerOn ? '🔥 Turn Burner OFF' : '🔥 Light Burner';
+
+            // Coffee status
+            const coffeeProg = this.wasm.rcw_get_coffee_progress();
+            const coffeeReady = this.wasm.rcw_is_coffee_ready();
+            document.getElementById('coffeeProgress').style.width = coffeeProg.toFixed(0) + '%';
+            document.getElementById('coffeePercent').textContent = coffeeProg.toFixed(0) + '%';
+            if (coffeeReady) {
+                document.getElementById('coffeeStatus').textContent = '✅ Coffee Ready! / कॉफ़ी तैयार है!';
+            }
+
+            // Tray status
+            const trayCount = this.wasm.rcw_get_tray_item_count();
+            document.getElementById('trayItemCount').textContent = trayCount + '/4 Items';
+
+            // Customer
+            const custId = this.wasm.rcw_get_customer_id();
+            const custState = this.wasm.rcw_get_customer_state();
+            const patience = this.wasm.rcw_get_customer_patience();
+            
+            const custNames = ['', 'Kashif (काशिफ)', 'Saumya (सौम्या)', 'Preet (प्रीत)', 'Shrey (श्रेय)', 'Mysterious Passenger (साया)', 'Inspector Sharma (पुलिस)', 'Station Worker', 'The Vengeful Son (बदला लेने वाला)'];
+            const custAvatars = ['', '🧔🏽', '👩🏽', '🧕🏽', '👨🏽', '🕵️', '👮🏽', '👷🏽', '👺'];
+            
+            document.getElementById('custName').textContent = custNames[custId] || 'No Customer / कोई नहीं';
+            document.getElementById('custAvatar').textContent = custAvatars[custId] || '👤';
+            document.getElementById('patienceBar').style.width = patience.toFixed(0) + '%';
+            document.getElementById('patiencePercentText').textContent = patience.toFixed(0) + '%';
+
+            // Objectives
+            const buf = 1024;
+            this.wasm.rcw_get_objective_title_eng(buf, 128);
+            document.getElementById('objTitle').textContent = this.readString(buf) || 'Run the Chai Stall';
+            this.wasm.rcw_get_objective_desc_eng(buf, 256);
+            document.getElementById('objDesc').textContent = this.readString(buf);
+
+            // Notifications
+            this.wasm.rcw_get_notification_eng(buf, 128);
+            const nEng = this.readString(buf);
+            this.wasm.rcw_get_notification_hin(buf + 256, 128);
+            const nHin = this.readString(buf + 256);
+            if (nEng) {
+                document.getElementById('notifEng').textContent = nEng;
+                document.getElementById('notifHin').textContent = nHin;
+            }
+
+            // Dialogue modal check
+            const dlgActive = this.wasm.rcw_is_dialogue_active();
+            const dlgModal = document.getElementById('dialogueModal');
+            if (dlgActive) {
+                dlgModal.classList.add('active');
+                this.wasm.rcw_get_speaker_name(buf, 64);
+                document.getElementById('dialogueSpeaker').textContent = this.readString(buf);
+                this.wasm.rcw_get_dialogue_text_eng(buf + 64, 512);
+                document.getElementById('dialogueEng').textContent = this.readString(buf + 64);
+                this.wasm.rcw_get_dialogue_text_hin(buf + 600, 512);
+                document.getElementById('dialogueHin').textContent = this.readString(buf + 600);
+
+                const choiceCount = this.wasm.rcw_get_dialogue_choice_count();
+                const choicesContainer = document.getElementById('dialogueChoices');
+                const nextWrap = document.getElementById('dialogueNextWrap');
+
+                if (choiceCount > 0) {
+                    choicesContainer.style.display = 'flex';
+                    choicesContainer.innerHTML = '';
+                    nextWrap.style.display = 'none';
+
+                    for (let c = 0; c < choiceCount; c++) {
+                        this.wasm.rcw_get_choice_text_eng(c, buf + 1200, 256);
+                        const cEng = this.readString(buf + 1200);
+                        this.wasm.rcw_get_choice_text_hin(c, buf + 1500, 256);
+                        const cHin = this.readString(buf + 1500);
+
+                        const btn = document.createElement('button');
+                        btn.className = 'choice-btn';
+                        btn.innerHTML = `<strong>${cEng}</strong><div style="font-size:0.8rem; color:#ffb74d;">${cHin}</div>`;
+                        btn.onclick = () => {
+                            this.wasm.rcw_dialogue_choice(c);
+                        };
+                        choicesContainer.appendChild(btn);
+                    }
+                } else {
+                    choicesContainer.style.display = 'none';
+                    nextWrap.style.display = 'flex';
+                }
+            } else {
+                dlgModal.classList.remove('active');
+            }
+
+            // Horror overlay on Shift >= 5
+            const horror = document.getElementById('horrorOverlay');
+            if (shift >= 5) horror.classList.add('active');
+            else horror.classList.remove('active');
+        }
+
+        // Canvas 2D Atmospheric Renderer
+        render() {
+            const c = this.ctx;
+            const w = this.canvas.width;
+            const h = this.canvas.height;
+
+            // Background sky (Day / Dusk / Midnight)
+            const shift = this.wasm ? this.wasm.rcw_get_shift() : 1;
+            let skyGrad = c.createLinearGradient(0, 0, 0, h);
+            if (shift === 1) {
+                skyGrad.addColorStop(0, '#1a233a');
+                skyGrad.addColorStop(1, '#ff8a65'); // Dawn orange
+            } else if (shift === 2) {
+                skyGrad.addColorStop(0, '#283593');
+                skyGrad.addColorStop(1, '#90caf9'); // Afternoon
+            } else if (shift === 3) {
+                skyGrad.addColorStop(0, '#211736');
+                skyGrad.addColorStop(1, '#e64a19'); // Dusk crimson
+            } else {
+                skyGrad.addColorStop(0, '#040608');
+                skyGrad.addColorStop(1, '#0e1724'); // Eerie Midnight
+            }
+            c.fillStyle = skyGrad;
+            c.fillRect(0, 0, w, h);
+
+            // Distant railway track & gravel
+            c.fillStyle = '#21252d';
+            c.fillRect(0, 140, w, 60);
+
+            // Sleepers & Rails
+            c.strokeStyle = '#37474f';
+            c.lineWidth = 4;
+            for (let x = 0; x < w; x += 18) {
+                c.beginPath();
+                c.moveTo(x, 150);
+                c.lineTo(x - 10, 190);
+                c.stroke();
+            }
+
+            // Iron rails
+            c.strokeStyle = '#b0bec5';
+            c.lineWidth = 3;
+            c.beginPath();
+            c.moveTo(0, 160);
+            c.lineTo(w, 160);
+            c.moveTo(0, 178);
+            c.lineTo(w, 178);
+            c.stroke();
+
+            // Passing Train
+            if (this.trainPosition > -300 && this.trainPosition < w + 200) {
+                c.fillStyle = '#1565c0'; // Indian Railways Blue Express
+                c.fillRect(this.trainPosition, 130, 260, 45);
+                c.fillStyle = '#fbc02d';
+                c.fillRect(this.trainPosition, 148, 260, 4); // Yellow stripe
+                // Windows
+                c.fillStyle = '#fff9c4';
+                for (let wx = this.trainPosition + 15; wx < this.trainPosition + 240; wx += 28) {
+                    c.fillRect(wx, 135, 16, 10);
+                }
+                // Locomotive Headlight glow
+                c.fillStyle = 'rgba(255, 235, 59, 0.4)';
+                c.beginPath();
+                c.moveTo(this.trainPosition + 260, 145);
+                c.lineTo(this.trainPosition + 380, 120);
+                c.lineTo(this.trainPosition + 380, 180);
+                c.fill();
+            }
+
+            // Fog effect during night shifts
+            if (shift >= 4) {
+                c.fillStyle = 'rgba(200, 220, 255, 0.08)';
+                c.fillRect(0, 120, w, 100);
+            }
+
+            // Platform concrete
+            c.fillStyle = '#373d49';
+            c.fillRect(0, 195, w, h - 195);
+            // Yellow safety border line
+            c.fillStyle = '#fbc02d';
+            c.fillRect(0, 195, w, 6);
+
+            // Overhead platform roof pillars & lights
+            c.fillStyle = '#1c222c';
+            c.fillRect(40, 20, 18, 180);
+            c.fillRect(w - 60, 20, 18, 180);
+            c.fillRect(0, 15, w, 15);
+
+            // Fluorescent Tube Lamp
+            c.fillStyle = '#fff';
+            c.fillRect(200, 25, 120, 6);
+            c.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            c.beginPath();
+            c.moveTo(260, 30);
+            c.lineTo(140, 280);
+            c.lineTo(380, 280);
+            c.fill();
+
+            // Chai Stall Counter
+            c.fillStyle = '#4e342e'; // Dark wood
+            c.fillRect(100, 250, 480, 120);
+            c.fillStyle = '#3e2723';
+            c.fillRect(90, 240, 500, 14);
+
+            // Gas Stove & Burner
+            c.fillStyle = '#424242';
+            c.fillRect(180, 235, 90, 12);
+            c.fillStyle = '#212121';
+            c.beginPath();
+            c.arc(225, 235, 22, 0, Math.PI, true);
+            c.fill();
+
+            // Burner flame
+            if (this.wasm && this.wasm.rcw_is_burner_on()) {
+                const flickerH = 10 + Math.random() * 6;
+                let flameGrad = c.createLinearGradient(225, 235, 225, 235 - flickerH);
+                flameGrad.addColorStop(0, '#00e5ff'); // Blue core
+                flameGrad.addColorStop(0.5, '#ff9100'); // Orange middle
+                flameGrad.addColorStop(1, '#ff3d00');
+                c.fillStyle = flameGrad;
+                c.beginPath();
+                c.moveTo(205, 235);
+                c.quadraticCurveTo(225, 235 - flickerH * 1.4, 245, 235);
+                c.fill();
+            }
+
+            // Stainless Steel Kettle / Tapeli
+            c.fillStyle = '#b0bec5';
+            c.beginPath();
+            c.moveTo(200, 233);
+            c.lineTo(250, 233);
+            c.lineTo(245, 185);
+            c.lineTo(205, 185);
+            c.closePath();
+            c.fill();
+            // Kettle Handle
+            c.strokeStyle = '#37474f';
+            c.lineWidth = 4;
+            c.beginPath();
+            c.arc(225, 180, 18, Math.PI, 0);
+            c.stroke();
+
+            // Tea liquid inside
+            const potCooked = this.wasm && this.wasm.rcw_is_pot_cooked();
+            const potBurned = this.wasm && this.wasm.rcw_is_pot_burned();
+            if (potBurned) c.fillStyle = '#212121';
+            else if (potCooked) c.fillStyle = '#6d4c41'; // Rich masala brown
+            else c.fillStyle = '#a1887f';
+            c.fillRect(208, 190, 34, 10);
+
+            // Steam particles
+            this.steamParticles.forEach(p => {
+                if (p.alpha > 0) {
+                    c.fillStyle = `rgba(255, 240, 225, ${p.alpha})`;
+                    c.beginPath();
+                    c.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    c.fill();
+                }
+            });
+
+            // Stacks of Kulhads (Clay cups)
+            for (let i = 0; i < 4; i++) {
+                c.fillStyle = '#d87d4a'; // Terracotta clay
+                c.beginPath();
+                c.moveTo(300 + i * 16, 238);
+                c.lineTo(312 + i * 16, 238);
+                c.lineTo(310 + i * 16, 218);
+                c.lineTo(302 + i * 16, 218);
+                c.closePath();
+                c.fill();
+            }
+
+            // Coffee Machine
+            c.fillStyle = '#263238';
+            c.fillRect(390, 180, 60, 60);
+            c.fillStyle = '#37474f';
+            c.fillRect(385, 175, 70, 8);
+            // Nozzle & Cup
+            c.fillStyle = '#cfd8dc';
+            c.fillRect(417, 215, 6, 12);
+            if (this.wasm && this.wasm.rcw_is_coffee_ready()) {
+                c.fillStyle = '#fff'; // Paper cup
+                c.fillRect(413, 227, 14, 13);
+            }
+
+            // Snack display tray (Samosa & Vadapav)
+            c.fillStyle = '#ffb300';
+            c.fillRect(470, 230, 90, 10); // Glass counter top
+            // Triangle samosa
+            c.fillStyle = '#d79a29';
+            c.beginPath();
+            c.moveTo(485, 230);
+            c.lineTo(500, 215);
+            c.lineTo(515, 230);
+            c.closePath();
+            c.fill();
+            // Vadapav bun
+            c.fillStyle = '#c88746';
+            c.beginPath();
+            c.arc(535, 224, 8, Math.PI, 0);
+            c.fill();
+
+            // Customer rendering on platform
+            const custId = this.wasm ? this.wasm.rcw_get_customer_id() : 0;
+            if (custId > 0) {
+                // Customer character silhouette / figure
+                c.fillStyle = (shift >= 5 && custId === 8) ? '#b71c1c' : '#263238';
+                // Head
+                c.beginPath();
+                c.arc(680, 200, 16, 0, Math.PI * 2);
+                c.fill();
+                // Body
+                c.fillRect(660, 216, 40, 80);
+                // Eyes / Expression
+                c.fillStyle = (shift >= 5) ? '#ff5252' : '#ffffff';
+                c.fillRect(673, 196, 4, 4);
+                c.fillRect(683, 196, 4, 4);
+            }
+        }
+
+        // Actions
+        toggleBurner() {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_toggle_burner(1);
+        }
+
+        addIngredient(itemType) {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_add_ingredient_to_pot(itemType);
+        }
+
+        pourChai(containerType) {
+            this.audio.init();
+            if (this.wasm) {
+                const prod = this.wasm.rcw_pour_chai(containerType);
+                if (prod > 0) this.heldItem = prod;
+            }
+        }
+
+        resetPot() {
+            if (this.wasm) this.wasm.rcw_toggle_burner(0);
+        }
+
+        insertCoffeeCup() {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_coffee_insert_cup(12);
+        }
+
+        brewCoffee() {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_coffee_brew();
+        }
+
+        pickupCoffee() {
+            this.audio.init();
+            if (this.wasm) {
+                const it = this.wasm.rcw_coffee_pickup();
+                if (it > 0) this.heldItem = it;
+            }
+        }
+
+        placeFuggi() {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_fuggi_place();
+        }
+
+        cutFuggi() {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_fuggi_cut();
+        }
+
+        addFuggiBrickToPot() {
+            this.audio.init();
+            if (this.wasm) {
+                const b = this.wasm.rcw_fuggi_take_brick();
+                if (b > 0) this.wasm.rcw_add_ingredient_to_pot(b);
+            }
+        }
+
+        addTasteMakerToPot() {
+            this.audio.init();
+            if (this.wasm) {
+                const m = this.wasm.rcw_fuggi_take_tastemaker();
+                if (m > 0) this.wasm.rcw_add_ingredient_to_pot(m);
+            }
+        }
+
+        packItem(itemType) {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_pack_item(itemType);
+        }
+
+        packHeldItem() {
+            this.audio.init();
+            if (this.heldItem > 0 && this.wasm) {
+                if (this.wasm.rcw_pack_item(this.heldItem)) {
+                    this.heldItem = 0;
+                }
+            }
+        }
+
+        clearTray() {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_clear_tray();
+        }
+
+        serveTray() {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_serve_customer();
+        }
+
+        nextDialogue() {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_dialogue_next();
+        }
+
+        skipDialogue() {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_dialogue_skip();
+        }
+
+        advanceShift() {
+            this.audio.init();
+            if (this.wasm) this.wasm.rcw_next_shift();
+        }
+
+        printBillModal() {
+            this.audio.init();
+            if (this.wasm) {
+                this.wasm.rcw_print_bill();
+                const buf = 1024;
+                this.wasm.rcw_get_bill_receipt(buf, 1024);
+                document.getElementById('receiptContent').textContent = this.readString(buf);
+                document.getElementById('billModal').classList.add('active');
+            }
+        }
+
+        inspectPlatform2() {
+            this.audio.init();
+            this.audio.playEerieDrone();
+            alert("Platform 2 Inspection:\n\nCold fog swirls around track 2. The distant screeching of train wheels echoes from the dark tunnel. A torn red cloth clings to the iron rail...");
+        }
+
+        readNewspaper() {
+            this.audio.init();
+            alert("FAKRIPUR GAZETTE - EDITION #104\n\n'MYSTERY OF FAKRIPUR JUNCTION'\nPolice investigate series of disappearances on the late-night passenger train. Eyewitnesses claim seeing an unsettled vendor arguing over 15 rupees years ago, before a tragedy occurred on track 2.");
+        }
+
+        setupKeyboard() {
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    this.nextDialogue();
+                } else if (e.code === 'KeyB') {
+                    this.toggleBurner();
+                } else if (e.code === 'KeyP') {
+                    this.pourChai(11);
+                } else if (e.code === 'KeyC') {
+                    this.brewCoffee();
+                } else if (e.code === 'KeyN') {
+                    this.placeFuggi();
+                } else if (e.code === 'KeyS') {
+                    this.serveTray();
+                } else if (e.code === 'Escape') {
+                    this.skipDialogue();
+                }
+            });
+
+            document.getElementById('btnAudioToggle').addEventListener('click', () => {
+                this.audio.init();
+                this.audio.enabled = !this.audio.enabled;
+                document.getElementById('btnAudioToggle').textContent = this.audio.enabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+            });
+        }
+    }
+
+    // Global bootstrap
+    const game = new RailwayChaiWala();
+    window.game = game;
+    window.addEventListener('DOMContentLoaded', () => {
+        game.init();
+    });
+    </script>
+</body>
+</html>
