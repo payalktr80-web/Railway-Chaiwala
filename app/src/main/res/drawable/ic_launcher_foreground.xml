@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Chai Cup / Kulhad -->
+    <path
+        android:fillColor="#F5B300"
+        android:pathData="M34,44 L74,44 L68,76 L40,76 Z" />
+    <!-- Chai Liquid -->
+    <path
+        android:fillColor="#6D4C41"
+        android:pathData="M37,47 L71,47 L69,53 L39,53 Z" />
+    <!-- Steam 1 -->
+    <path
+        android:strokeColor="#FFECB3"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M46,38 C44,32 50,30 48,24" />
+    <!-- Steam 2 -->
+    <path
+        android:strokeColor="#FFECB3"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M54,39 C56,33 52,29 55,22" />
+    <!-- Steam 3 -->
+    <path
+        android:strokeColor="#FFECB3"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M62,38 C60,32 66,30 64,24" />
+    <!-- Railway Track Base -->
+    <path
+        android:strokeColor="#FF6F00"
+        android:strokeWidth="4"
+        android:pathData="M24,84 L84,84" />
+    <path
+        android:strokeColor="#B0BEC5"
+        android:strokeWidth="2"
+        android:pathData="M32,80 L32,88 M46,80 L46,88 M60,80 L60,88 M74,80 L74,88" />
+</vector>

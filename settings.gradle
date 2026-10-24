@@ -1,0 +1,25 @@
+pluginManagement {
+    repositories {
+        def localRepo = file('/root/maven/localMvnRepository')
+        if (localRepo.exists()) {
+            maven { url = uri(localRepo) }
+        }
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        def localRepo = file('/root/maven/localMvnRepository')
+        if (localRepo.exists()) {
+            maven { url = uri(localRepo) }
+        }
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "RailwayChaiWala"
+include ':app'
